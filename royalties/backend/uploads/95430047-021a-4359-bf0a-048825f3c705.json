@@ -1,0 +1,42 @@
+{
+  "rows": [
+    {
+      "TRANSNR": "10001",
+      "TRANSTYPE": "Salg",
+      "KONTO": "AUTH-0042",
+      "AFTALE": "AFT-2024-001",
+      "ARTNR": "978-87-1234-567-8",
+      "KANAL": "Boghandel",
+      "PRISGRUPPE": "Standard",
+      "VILKAR": "A",
+      "BILAGSNR": "50001",
+      "BILAGSDATO": "15-01-2026",
+      "ANTAL": "500",
+      "STKPRIS": "149.95",
+      "STKAFREGNSATS": "0.12",
+      "BELOEB": "8997.00",
+      "VALUTA": "DKK",
+      "SKAT": "0.00",
+      "AFREGNBATCH": "1001"
+    },
+    {
+      "TRANSNR": "10002",
+      "TRANSTYPE": "Salg",
+      "KONTO": "AUTH-0042",
+      "AFTALE": "AFT-2024-001",
+      "ARTNR": "978-87-9876-543-2",
+      "KANAL": "Boghandel",
+      "PRISGRUPPE": "Standard",
+      "VILKAR": "A",
+      "BILAGSNR": "50002",
+      "BILAGSDATO": "15-01-2026",
+      "ANTAL": "200",
+      "STKPRIS": "99.50",
+      "STKAFREGNSATS": "0.10",
+      "BELOEB": "1990.00",
+      "VALUTA": "DKK",
+      "SKAT": "0.00",
+      "AFREGNBATCH": "1001"
+    }
+  ]
+}
