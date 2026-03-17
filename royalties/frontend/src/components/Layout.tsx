@@ -6,6 +6,7 @@ import { BookOpenCheck, LogOut, History, Upload, Shield, ChevronRight } from 'lu
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import HistorySheet from '@/components/HistorySheet'
+import ThemeToggle from '@/components/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 export default function Layout() {
@@ -86,6 +87,8 @@ export default function Layout() {
                 <History className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">History</span>
               </Button>
+
+              <ThemeToggle />
 
               <div className="h-4 w-px bg-border mx-1" />
 
