@@ -4,6 +4,7 @@ import type {
   TokenResponse,
   UserResponse,
   UploadResponse,
+  UploadHistoryItem,
   ValidationRunStarted,
   ValidationRunResponse,
   ValidationIssueSummary,
@@ -58,6 +59,11 @@ export function uploadFile(file: File) {
   const form = new FormData()
   form.append('file', file)
   return request<UploadResponse>('/uploads/', { method: 'POST', body: form })
+}
+
+/** List all uploads for the current user, newest first. */
+export function listUploads() {
+  return request<UploadHistoryItem[]>('/uploads/')
 }
 
 /** Get upload details by ID. */

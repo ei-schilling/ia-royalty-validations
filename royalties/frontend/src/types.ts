@@ -57,3 +57,21 @@ export interface ValidationRunStarted {
   validation_id: string
   status: string
 }
+
+export interface ValidationRunBrief {
+  validation_id: string
+  status: string
+  errors: number
+  warnings: number
+  infos: number
+  completed_at: string | null
+}
+
+export interface UploadHistoryItem {
+  upload_id: string
+  filename: string
+  file_format: string
+  row_count: number | null
+  uploaded_at: string
+  validations: ValidationRunBrief[]
+}

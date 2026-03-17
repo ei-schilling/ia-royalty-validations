@@ -135,6 +135,11 @@
 				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add label separator alert --overwrite --yes 2>&1"
 			],
 			"isBackground": false
+		},
+		{
+			"label": "shadcn add sheet scroll-area tooltip badge",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command 'cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add sheet scroll-area tooltip badge --overwrite --yes 2>&1'"
 		}
 	]
 }

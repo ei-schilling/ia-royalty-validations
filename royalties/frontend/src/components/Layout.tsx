@@ -1,14 +1,17 @@
 /** Application shell with header and navigation. */
 
+import { useState } from 'react'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
-import { BookOpenCheck, LogOut } from 'lucide-react'
+import { BookOpenCheck, LogOut, History } from 'lucide-react'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import HistorySheet from '@/components/HistorySheet'
 
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   function handleLogout() {
     logout()
@@ -26,8 +29,12 @@ export default function Layout() {
           </Link>
           {user && (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground font-mono">{user.nickname}</span>
+              <Button variant="ghost" size="sm" onClick={() => setHistoryOpen(true)}>
+                <History className="h-3.5 w-3.5" />
+                History
+              </Button>
               <Separator orientation="vertical" className="h-4" />
+              <span className="text-xs text-muted-foreground font-mono">{user.nickname}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-3.5 w-3.5" />
                 Logout
@@ -46,6 +53,9 @@ export default function Layout() {
       <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
         Royalty Statement Validator &middot; Schilling ERP
       </footer>
+
+      {/* History sidebar */}
+      <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
     </div>
   )
 }

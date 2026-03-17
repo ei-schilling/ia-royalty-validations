@@ -7,12 +7,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.auth import CurrentUser
 from app.config import settings
 from app.db.database import get_db
 from app.models.upload import Upload
-from app.schemas.upload import UploadResponse
+from app.schemas.upload import UploadHistoryItem, UploadResponse
 from app.services.upload_service import process_upload
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
@@ -74,6 +75,22 @@ async def upload_file(
     await db.flush()
     await db.refresh(upload)
     return upload
+
+
+@router.get("/", response_model=list[UploadHistoryItem])
+async def list_uploads(
+    current_user: CurrentUser,
+    db: DbSession,
+) -> list[Upload]:
+    """List all uploads for the current user, newest first, with validation runs."""
+    result = await db.execute(
+        select(Upload)
+        .where(Upload.user_id == current_user.id)
+        .options(selectinload(Upload.validation_runs))
+        .order_by(Upload.uploaded_at.desc())
+        .limit(50)
+    )
+    return list(result.scalars().all())
 
 
 @router.get("/{upload_id}", response_model=UploadResponse)
