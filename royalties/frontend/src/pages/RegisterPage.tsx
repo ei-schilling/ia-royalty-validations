@@ -9,6 +9,7 @@ import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import AuthBackground from '@/components/AuthBackground'
 
 export default function RegisterPage() {
   const [nickname, setNickname] = useState('')
@@ -48,7 +49,8 @@ export default function RegisterPage() {
   const strengthColor = ['', 'bg-destructive', 'bg-amber-500', 'bg-emerald-500'][strength]
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 relative">
+      <AuthBackground />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

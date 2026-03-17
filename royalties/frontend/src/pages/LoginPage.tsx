@@ -9,6 +9,7 @@ import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import AuthBackground from '@/components/AuthBackground'
 
 export default function LoginPage() {
   const [nickname, setNickname] = useState('')
@@ -35,7 +36,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[85vh] flex">
+    <div className="min-h-[85vh] flex relative">
+      <AuthBackground />
       {/* Left — branding panel */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -54,13 +56,17 @@ export default function LoginPage() {
           </div>
 
           <h2 className="font-display text-3xl font-bold text-foreground leading-tight mb-4">
-            Validate settlements
+            Every royalty,
             <br />
-            <span className="text-gradient">with confidence.</span>
+            every row —
+            <br />
+            <span className="text-gradient">verified in seconds.</span>
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-            Automated royalty statement validation against Schilling ERP business rules. Catch
-            errors before they cost you.
+            Stop chasing discrepancies across spreadsheets. Upload your settlement files, and let
+            the engine cross-check rates, territories, deductions, and totals against Schilling ERP
+            — automatically. When something doesn&apos;t add up, you&apos;ll know exactly where and
+            why.
           </p>
         </div>
 
