@@ -22,6 +22,7 @@ from app.schemas.validation import (
 )
 from app.services.validation_service import run_validation
 from app.services.pdf_service import generate_validation_pdf
+from app.services.annotated_pdf_service import generate_annotated_pdf
 
 router = APIRouter(prefix="/api/validations", tags=["validations"])
 
@@ -156,4 +157,53 @@ async def download_validation_pdf(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'},
+    )
+
+
+@router.get("/{validation_id}/annotated-pdf")
+async def download_annotated_pdf(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession,
+) -> Response:
+    """Generate a PDF of the original data with validation issues highlighted."""
+    result = await db.execute(
+        select(ValidationRun)
+        .where(ValidationRun.id == validation_id)
+        .options(selectinload(ValidationRun.issues), selectinload(ValidationRun.upload))
+    )
+    run = result.scalars().first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Validation run not found")
+
+    upload = run.upload
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    issues_dicts = [
+        {
+            "severity": issue.severity,
+            "rule_id": issue.rule_id,
+            "rule_description": issue.rule_description,
+            "row_number": issue.row_number,
+            "field": issue.field,
+            "expected_value": issue.expected_value,
+            "actual_value": issue.actual_value,
+            "message": issue.message,
+        }
+        for issue in run.issues
+    ]
+
+    pdf_bytes = generate_annotated_pdf(
+        file_path=upload.file_path,
+        file_format=upload.file_format,
+        filename=upload.filename,
+        validation_id=str(validation_id),
+        total_rows=upload.row_count or 0,
+        issues=issues_dicts,
+    )
+
+    safe_name = upload.filename.rsplit(".", 1)[0] if "." in upload.filename else upload.filename
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}_annotated.pdf"'},
     )

@@ -18,8 +18,9 @@ import {
   Diff,
   CircleCheck,
   FileDown,
+  FileSearch,
 } from 'lucide-react'
-import { getValidation, downloadValidationPdf } from '@/api'
+import { getValidation, downloadValidationPdf, downloadAnnotatedPdf } from '@/api'
 import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -125,6 +126,7 @@ export default function ResultsPage() {
   const [data, setData] = useState<ValidationRunResponse | null>(null)
   const [error, setError] = useState('')
   const [downloading, setDownloading] = useState(false)
+  const [downloadingAnnotated, setDownloadingAnnotated] = useState(false)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     error: true,
     warning: false,
@@ -233,6 +235,26 @@ export default function ResultsPage() {
           >
             <FileDown className={cn('h-3.5 w-3.5', downloading && 'animate-bounce')} />
             {downloading ? 'Generating…' : 'Export Validation'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 group"
+            disabled={downloadingAnnotated}
+            onClick={async () => {
+              if (!validationId) return
+              setDownloadingAnnotated(true)
+              try {
+                await downloadAnnotatedPdf(validationId)
+              } catch {
+                // silently fail — user can retry
+              } finally {
+                setDownloadingAnnotated(false)
+              }
+            }}
+          >
+            <FileSearch className={cn('h-3.5 w-3.5', downloadingAnnotated && 'animate-bounce')} />
+            {downloadingAnnotated ? 'Generating…' : 'Export Annotated'}
           </Button>
           <Link to="/upload">
             <Button variant="outline" size="sm" className="gap-1.5 group">
