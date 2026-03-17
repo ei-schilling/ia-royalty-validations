@@ -4,14 +4,14 @@ import uuid
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.auth import CurrentUser
 from app.config import settings
 from app.db.database import get_db
 from app.models.upload import Upload
-from app.models.user import User
 from app.schemas.upload import UploadResponse
 from app.services.upload_service import process_upload
 
@@ -26,15 +26,10 @@ MAX_BYTES = settings.max_upload_size_mb * 1024 * 1024
 @router.post("/", response_model=UploadResponse, status_code=201)
 async def upload_file(
     file: UploadFile,
-    user_id: Annotated[uuid.UUID, Form()],
+    current_user: CurrentUser,
     db: DbSession,
 ) -> Upload:
     """Upload a royalty statement file for validation."""
-    # Validate user exists
-    result = await db.execute(select(User).where(User.id == user_id))
-    if not result.scalars().first():
-        raise HTTPException(status_code=404, detail="User not found")
-
     # Validate file is present
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
@@ -69,7 +64,7 @@ async def upload_file(
     # Record in database
     upload = Upload(
         id=file_id,
-        user_id=user_id,
+        user_id=current_user.id,
         filename=file.filename,
         file_path=str(stored_path),
         file_format=ext,
@@ -82,7 +77,9 @@ async def upload_file(
 
 
 @router.get("/{upload_id}", response_model=UploadResponse)
-async def get_upload(upload_id: uuid.UUID, db: DbSession) -> Upload:
+async def get_upload(
+    upload_id: uuid.UUID, _current_user: CurrentUser, db: DbSession
+) -> Upload:
     """Get details of a previously uploaded file."""
     result = await db.execute(select(Upload).where(Upload.id == upload_id))
     upload = result.scalars().first()

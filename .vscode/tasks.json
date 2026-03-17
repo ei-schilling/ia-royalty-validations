@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Frontend Dev Server",
+			"type": "shell",
+			"command": "cd royalties/frontend && npx vite --port 5173",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

@@ -3,8 +3,10 @@
 import { useState, useRef, useCallback, type DragEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Upload, FileText, FileSpreadsheet, FileJson, FileType2 } from 'lucide-react'
-import { uploadFile, triggerValidation } from '../api'
-import { Button, Card, Spinner } from '../components/ui'
+import { uploadFile, triggerValidation } from '@/api'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
 
 const ICON_MAP: Record<string, typeof FileText> = {
   csv: FileText,
@@ -20,17 +22,11 @@ export default function UploadPage() {
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
-  const userId = localStorage.getItem('rsv_user_id')
 
   const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault()
     setDragging(true)
   }, [])
-
-  if (!userId) {
-    navigate('/')
-    return null
-  }
 
   const ext = file?.name.split('.').pop()?.toLowerCase() ?? ''
   const FileIcon = ICON_MAP[ext] ?? FileText
@@ -43,11 +39,11 @@ export default function UploadPage() {
   }
 
   async function handleUpload() {
-    if (!file || !userId) return
+    if (!file) return
     setUploading(true)
     setError('')
     try {
-      const upload = await uploadFile(file, userId)
+      const upload = await uploadFile(file)
       const run = await triggerValidation(upload.upload_id)
       navigate(`/results/${run.validation_id}`)
     } catch (err) {

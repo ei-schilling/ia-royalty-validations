@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { AlertCircle, AlertTriangle, Info, CheckCircle2, Upload } from 'lucide-react'
-import { getValidation } from '../api'
-import type { ValidationRunResponse, ValidationIssueSummary } from '../types'
-import { Badge, Button, Card, Spinner } from '../components/ui'
-import { cn } from '../lib/utils'
+import { getValidation } from '@/api'
+import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/lib/utils'
 
 const SEVERITY_CONFIG = {
   error: { icon: AlertCircle, color: 'error' as const, label: 'Errors' },
@@ -175,7 +178,7 @@ function IssueCard({ issue }: { issue: ValidationIssueSummary }) {
   return (
     <Card className="p-4 flex gap-3">
       <div className="pt-0.5">
-        <Badge color={config.color}>
+        <Badge variant={config.color}>
           <SevIcon className="h-3 w-3 mr-1" />
           {issue.severity}
         </Badge>

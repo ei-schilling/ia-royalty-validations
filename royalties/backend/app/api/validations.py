@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.api.auth import CurrentUser
 from app.db.database import get_db
 from app.models.upload import Upload
 from app.models.validation_result import ValidationIssue, ValidationRun
@@ -28,6 +29,7 @@ DbSession = Annotated[AsyncSession, Depends(get_db)]
 @router.post("/{upload_id}/run", response_model=ValidationRunStarted, status_code=201)
 async def trigger_validation(
     upload_id: uuid.UUID,
+    _current_user: CurrentUser,
     db: DbSession,
     body: ValidationRunRequest | None = None,
 ) -> dict:
@@ -43,7 +45,9 @@ async def trigger_validation(
 
 
 @router.get("/{validation_id}", response_model=ValidationRunResponse)
-async def get_validation(validation_id: uuid.UUID, db: DbSession) -> dict:
+async def get_validation(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession
+) -> dict:
     """Get full validation results including all issues."""
     result = await db.execute(
         select(ValidationRun)
@@ -79,6 +83,7 @@ async def get_validation(validation_id: uuid.UUID, db: DbSession) -> dict:
 @router.get("/{validation_id}/issues", response_model=list[ValidationIssueSummary])
 async def get_validation_issues(
     validation_id: uuid.UUID,
+    _current_user: CurrentUser,
     db: DbSession,
     severity: Annotated[str | None, Query()] = None,
     page: Annotated[int, Query(ge=1)] = 1,

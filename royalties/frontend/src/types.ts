@@ -6,6 +6,12 @@ export interface UserResponse {
   created_at: string
 }
 
+export interface TokenResponse {
+  access_token: string
+  token_type: string
+  user: UserResponse
+}
+
 export interface UploadResponse {
   upload_id: string
   filename: string

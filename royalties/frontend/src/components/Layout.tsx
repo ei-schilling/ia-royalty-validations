@@ -1,10 +1,17 @@
 /** Application shell with header and navigation. */
 
-import { Outlet, Link } from 'react-router-dom'
-import { BookOpenCheck } from 'lucide-react'
+import { Outlet, Link, useNavigate } from 'react-router-dom'
+import { BookOpenCheck, LogOut } from 'lucide-react'
+import { useAuth } from '@/components/AuthContext'
 
 export default function Layout() {
-  const nickname = localStorage.getItem('rsv_nickname')
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -15,7 +22,18 @@ export default function Layout() {
             <BookOpenCheck className="h-6 w-6 text-brand-600 group-hover:text-brand-700 transition-colors" />
             <span className="font-display text-lg text-ink-900">Royalty Validator</span>
           </Link>
-          {nickname && <span className="text-xs text-ink-400 font-mono">{nickname}</span>}
+          {user && (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-ink-400 font-mono">{user.nickname}</span>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 text-xs text-ink-500 hover:text-ink-700 transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

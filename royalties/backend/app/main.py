@@ -25,6 +25,8 @@ app = FastAPI(
     description="Validates royalty statement files against Schilling ERP business rules",
     version="0.1.0",
     lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 app.add_middleware(

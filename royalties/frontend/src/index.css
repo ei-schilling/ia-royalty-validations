@@ -4,11 +4,46 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-brand-50 text-ink-950 font-body antialiased;
-  min-height: 100vh;
+@layer base {
+  :root {
+    --background: 30 33% 97%; /* brand-50 #faf5f0 */
+    --foreground: 20 28% 10%; /* ink-950  #1a1a1a */
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 28% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 28% 10%;
+
+    --primary: 25 50% 30%; /* brand-700 #754a27 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%; /* ink-50 */
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 0 0% 91%; /* ink-100 */
+    --muted-foreground: 0 0% 43%; /* ink-500 */
+
+    --accent: 30 33% 92%; /* brand-100 */
+    --accent-foreground: 25 50% 30%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 82%; /* ink-200 */
+    --input: 0 0% 69%; /* ink-300 */
+    --ring: 25 50% 30%; /* brand-700 */
+
+    --radius: 0.5rem;
+  }
 }
 
-* {
-  @apply border-ink-200;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    min-height: 100vh;
+  }
 }
