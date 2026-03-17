@@ -1,12 +1,7 @@
 import { Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const modes = [
   { value: 'light' as const, icon: Sun, label: 'Light' },

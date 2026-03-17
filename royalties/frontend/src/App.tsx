@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import UploadPage from './pages/UploadPage'
 import ResultsPage from './pages/ResultsPage'
+import HelpPage from './pages/HelpPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/results/:validationId" element={<ResultsPage />} />
+          <Route path="/help" element={<HelpPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

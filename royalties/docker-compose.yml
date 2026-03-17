@@ -36,6 +36,28 @@ services:
     depends_on:
       - backend
 
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: royalties-anythingllm
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      STORAGE_DIR: /app/server/storage
+      # ── Connect to the project's PostgreSQL ──
+      # AnythingLLM can use SQL agent skills to query this DB
+      DATABASE_CONNECTION_STRING: postgresql://validator:validator@db:5432/validator
+    ports:
+      - "3001:3001"
+    volumes:
+      - anythingllm_storage:/app/server/storage
+      - ./anythingllm.env:/app/server/.env
+      # Share the uploads volume so AnythingLLM can read royalty docs
+      - uploads:/app/server/storage/hotdir/royalty-docs:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
   uploads:
+  anythingllm_storage:

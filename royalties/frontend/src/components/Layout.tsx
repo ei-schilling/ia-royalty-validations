@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { BookOpenCheck, LogOut, History, Upload, Shield, ChevronRight } from 'lucide-react'
+import { BookOpenCheck, LogOut, History, Upload, Shield, ChevronRight, Bot } from 'lucide-react'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import HistorySheet from '@/components/HistorySheet'
@@ -22,6 +22,7 @@ export default function Layout() {
 
   const isUpload = location.pathname === '/upload' || location.pathname === '/'
   const isResults = location.pathname.startsWith('/results')
+  const isHelp = location.pathname === '/help'
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -51,69 +52,82 @@ export default function Layout() {
           </Link>
 
           {/* Nav + Actions */}
-          {user && (
-            <div className="flex items-center gap-1">
-              {/* Breadcrumb nav */}
-              <nav className="hidden sm:flex items-center mr-4 text-xs text-muted-foreground">
-                <Link
-                  to="/upload"
-                  className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors',
-                    isUpload
-                      ? 'bg-muted text-foreground'
-                      : 'hover:text-foreground hover:bg-muted/50',
+          <div className="flex items-center gap-1">
+            {user && (
+              <>
+                {/* Breadcrumb nav */}
+                <nav className="hidden sm:flex items-center mr-4 text-xs text-muted-foreground">
+                  <Link
+                    to="/upload"
+                    className={cn(
+                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors',
+                      isUpload
+                        ? 'bg-muted text-foreground'
+                        : 'hover:text-foreground hover:bg-muted/50',
+                    )}
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload
+                  </Link>
+                  {isResults && (
+                    <>
+                      <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground/40" />
+                      <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted text-foreground">
+                        <Shield className="h-3.5 w-3.5" />
+                        Results
+                      </span>
+                    </>
                   )}
+                  <Link
+                    to="/help"
+                    className={cn(
+                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors',
+                      isHelp
+                        ? 'bg-muted text-foreground'
+                        : 'hover:text-foreground hover:bg-muted/50',
+                    )}
+                  >
+                    <Bot className="h-3.5 w-3.5" />
+                    Help
+                  </Link>
+                </nav>
+
+                <Button
+                  variant={historyOpen ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setHistoryOpen(!historyOpen)}
+                  className="gap-1.5"
                 >
-                  <Upload className="h-3.5 w-3.5" />
-                  Upload
-                </Link>
-                {isResults && (
-                  <>
-                    <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground/40" />
-                    <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted text-foreground">
-                      <Shield className="h-3.5 w-3.5" />
-                      Results
+                  <History className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">History</span>
+                </Button>
+
+                <div className="h-4 w-px bg-border mx-1" />
+
+                {/* User chip */}
+                <div className="flex items-center gap-2 px-2 py-1 rounded-md">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary uppercase">
+                      {user.nickname[0]}
                     </span>
-                  </>
-                )}
-              </nav>
-
-              <Button
-                variant={historyOpen ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setHistoryOpen(!historyOpen)}
-                className="gap-1.5"
-              >
-                <History className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">History</span>
-              </Button>
-
-              <ThemeToggle />
-
-              <div className="h-4 w-px bg-border mx-1" />
-
-              {/* User chip */}
-              <div className="flex items-center gap-2 px-2 py-1 rounded-md">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary uppercase">
-                    {user.nickname[0]}
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium hidden sm:inline max-w-[80px] truncate">
+                    {user.nickname}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground font-medium hidden sm:inline max-w-[80px] truncate">
-                  {user.nickname}
-                </span>
-              </div>
 
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleLogout}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          )}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={handleLogout}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
