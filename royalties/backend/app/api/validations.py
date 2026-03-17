@@ -10,12 +10,12 @@ from sqlalchemy.orm import selectinload
 
 from app.db.database import get_db
 from app.models.upload import Upload
-from app.models.validation_result import ValidationRun, ValidationIssue
+from app.models.validation_result import ValidationIssue, ValidationRun
 from app.schemas.validation import (
+    ValidationIssueSummary,
     ValidationRunRequest,
     ValidationRunResponse,
     ValidationRunStarted,
-    ValidationIssueSummary,
     ValidationSummary,
 )
 from app.services.validation_service import run_validation
@@ -86,15 +86,11 @@ async def get_validation_issues(
 ) -> list[ValidationIssue]:
     """Get paginated validation issues, optionally filtered by severity."""
     # Verify run exists
-    run_result = await db.execute(
-        select(ValidationRun).where(ValidationRun.id == validation_id)
-    )
+    run_result = await db.execute(select(ValidationRun).where(ValidationRun.id == validation_id))
     if not run_result.scalars().first():
         raise HTTPException(status_code=404, detail="Validation run not found")
 
-    query = select(ValidationIssue).where(
-        ValidationIssue.validation_run_id == validation_id
-    )
+    query = select(ValidationIssue).where(ValidationIssue.validation_run_id == validation_id)
     if severity:
         query = query.where(ValidationIssue.severity == severity)
     query = query.offset((page - 1) * size).limit(size)

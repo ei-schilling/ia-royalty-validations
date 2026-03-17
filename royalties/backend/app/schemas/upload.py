@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 class UploadResponse(BaseModel):
     """Response body after successful file upload."""
+
     upload_id: uuid.UUID = Field(validation_alias="id")
     filename: str
     file_format: str

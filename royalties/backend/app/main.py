@@ -1,16 +1,16 @@
 """Royalty Statement Validator — FastAPI application entry point."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.db.database import init_db
 from app.api.auth import router as auth_router
 from app.api.uploads import router as uploads_router
 from app.api.validations import router as validations_router
+from app.config import settings
+from app.db.database import init_db
 
 
 @asynccontextmanager

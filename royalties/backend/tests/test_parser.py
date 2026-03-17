@@ -5,10 +5,10 @@ from pathlib import Path
 import pytest
 
 from app.validation.parser import (
-    parse_file,
-    _resolve_formula,
     _danish_number_to_str,
     _normalize_column_name,
+    _resolve_formula,
+    parse_file,
 )
 
 

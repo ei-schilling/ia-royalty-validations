@@ -32,6 +32,7 @@ def parse_file(file_path: Path, file_format: str) -> list[dict]:
 # CSV parser — supports both Schilling native (semicolon) and standard (comma)
 # ---------------------------------------------------------------------------
 
+
 def _parse_csv(file_path: Path) -> list[dict]:
     """Parse a CSV file, auto-detecting Schilling native vs. standard format."""
     raw = file_path.read_text(encoding="utf-8-sig")
@@ -72,6 +73,7 @@ def _resolve_formula(val: str) -> str:
 # Excel parser
 # ---------------------------------------------------------------------------
 
+
 def _parse_excel(file_path: Path) -> list[dict]:
     """Parse an Excel file, using the first worksheet with header row."""
     wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
@@ -84,7 +86,11 @@ def _parse_excel(file_path: Path) -> list[dict]:
     for row_idx, row in enumerate(rows_iter, start=2):
         normalized = {}
         for col_idx, val in enumerate(row):
-            key = normalized_headers[col_idx] if col_idx < len(normalized_headers) else f"col_{col_idx}"
+            key = (
+                normalized_headers[col_idx]
+                if col_idx < len(normalized_headers)
+                else f"col_{col_idx}"
+            )
             normalized[key] = str(val).strip() if val is not None else ""
         normalized["_row_number"] = row_idx
         normalized["_source"] = "xlsx"
@@ -96,6 +102,7 @@ def _parse_excel(file_path: Path) -> list[dict]:
 # ---------------------------------------------------------------------------
 # JSON parser
 # ---------------------------------------------------------------------------
+
 
 def _parse_json(file_path: Path) -> list[dict]:
     """Parse a JSON file containing royalty statement data."""
@@ -111,7 +118,9 @@ def _parse_json(file_path: Path) -> list[dict]:
 
     rows = []
     for idx, raw in enumerate(raw_rows):
-        normalized = {_normalize_column_name(k): str(v) if v is not None else "" for k, v in raw.items()}
+        normalized = {
+            _normalize_column_name(k): str(v) if v is not None else "" for k, v in raw.items()
+        }
         normalized["_row_number"] = idx + 1
         normalized["_source"] = "json"
         rows.append(normalized)
@@ -121,6 +130,7 @@ def _parse_json(file_path: Path) -> list[dict]:
 # ---------------------------------------------------------------------------
 # PDF parser — Schilling "Royalty afregning" specific
 # ---------------------------------------------------------------------------
+
 
 def _parse_pdf(file_path: Path) -> list[dict]:
     """Parse a Schilling Royalty afregning PDF into normalized rows.
@@ -250,13 +260,13 @@ def _parse_sales_line(line: str) -> dict | None:
     """
     # Match percentage rate lines
     pct_match = re.match(
-        r"^(.+?)\s+"           # Channel
-        r"(.+?)\s+"            # Price group
-        r"(-?[\d.,]+)%\s+"    # Rate (percentage)
-        r"(-?[\d.,]+)\s+"     # Quantity
-        r"(-?[\d.,]+)\s+"     # Price basis
-        r"(-?[\d.,]+)$",      # Royalty amount
-        line.strip()
+        r"^(.+?)\s+"  # Channel
+        r"(.+?)\s+"  # Price group
+        r"(-?[\d.,]+)%\s+"  # Rate (percentage)
+        r"(-?[\d.,]+)\s+"  # Quantity
+        r"(-?[\d.,]+)\s+"  # Price basis
+        r"(-?[\d.,]+)$",  # Royalty amount
+        line.strip(),
     )
     if pct_match:
         return {
@@ -272,13 +282,13 @@ def _parse_sales_line(line: str) -> dict | None:
 
     # Match fixed-rate (kr.) lines
     kr_match = re.match(
-        r"^(.+?)\s+"           # Channel
-        r"(.+?)\s+"            # Price group
+        r"^(.+?)\s+"  # Channel
+        r"(.+?)\s+"  # Price group
         r"(-?[\d.,]+)kr\.\s+"  # Rate (fixed amount per unit)
-        r"(-?[\d.,]+)\s+"      # Quantity
-        r"(-?[\d.,]+)\s+"      # Price basis
-        r"(-?[\d.,]+)$",       # Royalty amount
-        line.strip()
+        r"(-?[\d.,]+)\s+"  # Quantity
+        r"(-?[\d.,]+)\s+"  # Price basis
+        r"(-?[\d.,]+)$",  # Royalty amount
+        line.strip(),
     )
     if kr_match:
         return {
@@ -357,6 +367,7 @@ def _extract_pdf_summary(text: str) -> dict:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _danish_number_to_str(val: str) -> str:
     """Convert Danish number format to a plain decimal string.

@@ -27,23 +27,33 @@ class MissingTitlesRule(BaseRule):
             titel = row.get("titel", "").strip()
 
             if not artnr and not titel:
-                issues.append(ValidationIssue(
-                    severity=Severity.ERROR,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="artnr/titel",
-                    expected_value="non-empty product identifier",
-                    actual_value="(empty)",
-                    message="Missing product identifier — no Artnr or Titel found",
-                    context={"aftale": row.get("aftale", ""), "kontonr": row.get("kontonr", "")},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.ERROR,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="artnr/titel",
+                        expected_value="non-empty product identifier",
+                        actual_value="(empty)",
+                        message="Missing product identifier — no Artnr or Titel found",
+                        context={
+                            "aftale": row.get("aftale", ""),
+                            "kontonr": row.get("kontonr", ""),
+                        },
+                    )
+                )
                 continue
 
             # Validate ISBN-13 checksum if the artnr looks like an ISBN
-            if artnr and len(artnr.replace("-", "")) == 13 and artnr.replace("-", "").isdigit():
-                if not _valid_isbn13(artnr):
-                    issues.append(ValidationIssue(
+            if (
+                artnr
+                and len(artnr.replace("-", "")) == 13
+                and artnr.replace("-", "").isdigit()
+                and not _valid_isbn13(artnr)
+            ):
+                issues.append(
+                    ValidationIssue(
                         severity=Severity.WARNING,
                         rule_id=self.rule_id,
                         rule_description=self.description,
@@ -53,7 +63,8 @@ class MissingTitlesRule(BaseRule):
                         actual_value=artnr,
                         message=f"ISBN-13 checksum is invalid: {artnr}",
                         context={"aftale": row.get("aftale", "")},
-                    ))
+                    )
+                )
 
         return issues
 

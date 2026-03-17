@@ -1,12 +1,12 @@
 """Validation service — orchestrates validation runs against uploaded files."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.upload import Upload
-from app.models.validation_result import ValidationRun, ValidationIssue
+from app.models.validation_result import ValidationIssue, ValidationRun
 from app.validation.engine import ValidationEngine
 from app.validation.parser import parse_file
 
@@ -17,7 +17,7 @@ async def run_validation(
     rules_filter: list[str],
 ) -> ValidationRun:
     """Execute validation rules against the uploaded file and persist results."""
-    run = ValidationRun(upload_id=upload.id, status="running", started_at=datetime.now(timezone.utc))
+    run = ValidationRun(upload_id=upload.id, status="running", started_at=datetime.now(UTC))
     db.add(run)
     await db.flush()
 
@@ -30,7 +30,9 @@ async def run_validation(
         warning_count = sum(1 for i in issues if i.severity.value == "warning")
         info_count = sum(1 for i in issues if i.severity.value == "info")
         rules_executed = len(engine.get_active_rules(rules_filter))
-        passed_count = rules_executed - len({i.rule_id for i in issues if i.severity.value == "error"})
+        passed_count = rules_executed - len(
+            {i.rule_id for i in issues if i.severity.value == "error"}
+        )
 
         for issue in issues:
             db_issue = ValidationIssue(
@@ -55,17 +57,19 @@ async def run_validation(
         run.info_count = info_count
     except Exception as exc:
         run.status = "failed"
-        db.add(ValidationIssue(
-            validation_run_id=run.id,
-            severity="error",
-            rule_id="system",
-            rule_description="System error during validation",
-            message=str(exc),
-            context={"error_type": type(exc).__name__},
-        ))
+        db.add(
+            ValidationIssue(
+                validation_run_id=run.id,
+                severity="error",
+                rule_id="system",
+                rule_description="System error during validation",
+                message=str(exc),
+                context={"error_type": type(exc).__name__},
+            )
+        )
         run.error_count = 1
 
-    run.completed_at = datetime.now(timezone.utc)
+    run.completed_at = datetime.now(UTC)
     await db.flush()
     await db.refresh(run)
     return run

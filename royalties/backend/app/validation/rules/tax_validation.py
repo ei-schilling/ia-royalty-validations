@@ -35,31 +35,35 @@ class TaxValidationRule(BaseRule):
             try:
                 afgift_val = float(afgift)
             except (ValueError, TypeError):
-                issues.append(ValidationIssue(
-                    severity=Severity.WARNING,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="afgift",
-                    expected_value="numeric value",
-                    actual_value=afgift,
-                    message=f"Duty/tax amount is not numeric: '{afgift}'",
-                    context={"aftale": row.get("aftale", "")},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="afgift",
+                        expected_value="numeric value",
+                        actual_value=afgift,
+                        message=f"Duty/tax amount is not numeric: '{afgift}'",
+                        context={"aftale": row.get("aftale", "")},
+                    )
+                )
                 continue
 
             # Duty should be zero or a negative deduction
             if afgift_val > 0:
-                issues.append(ValidationIssue(
-                    severity=Severity.WARNING,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="afgift",
-                    expected_value="<= 0 (deduction)",
-                    actual_value=str(afgift_val),
-                    message=f"Duty/tax amount is positive ({afgift_val}) — expected a deduction (negative or zero)",
-                    context={"aftale": row.get("aftale", "")},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="afgift",
+                        expected_value="<= 0 (deduction)",
+                        actual_value=str(afgift_val),
+                        message=f"Duty/tax amount is positive ({afgift_val}) — expected a deduction (negative or zero)",
+                        context={"aftale": row.get("aftale", "")},
+                    )
+                )
 
         return issues

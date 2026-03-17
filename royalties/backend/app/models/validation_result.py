@@ -1,9 +1,9 @@
 """Validation run and issue models for storing validation results."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
-from sqlalchemy import String, Integer, DateTime, ForeignKey, JSON, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -14,7 +14,9 @@ class ValidationRun(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     upload_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("uploads.id"))
-    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending|running|completed|failed
+    status: Mapped[str] = mapped_column(
+        String(20), default="pending"
+    )  # pending|running|completed|failed
     rules_executed: Mapped[int] = mapped_column(Integer, default=0)
     passed_count: Mapped[int] = mapped_column(Integer, default=0)
     warning_count: Mapped[int] = mapped_column(Integer, default=0)

@@ -1,36 +1,31 @@
 /** Validation results page — displays summary and issue details. */
 
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import {
-  AlertCircle,
-  AlertTriangle,
-  Info,
-  CheckCircle2,
-  Upload,
-} from 'lucide-react';
-import { getValidation } from '../api';
-import type { ValidationRunResponse, ValidationIssueSummary } from '../types';
-import { Badge, Button, Card, Spinner, cn } from '../components/ui';
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { AlertCircle, AlertTriangle, Info, CheckCircle2, Upload } from 'lucide-react'
+import { getValidation } from '../api'
+import type { ValidationRunResponse, ValidationIssueSummary } from '../types'
+import { Badge, Button, Card, Spinner } from '../components/ui'
+import { cn } from '../lib/utils'
 
 const SEVERITY_CONFIG = {
   error: { icon: AlertCircle, color: 'error' as const, label: 'Errors' },
   warning: { icon: AlertTriangle, color: 'warning' as const, label: 'Warnings' },
   info: { icon: Info, color: 'info' as const, label: 'Info' },
-};
+}
 
 export default function ResultsPage() {
-  const { validationId } = useParams<{ validationId: string }>();
-  const [data, setData] = useState<ValidationRunResponse | null>(null);
-  const [error, setError] = useState('');
-  const [filter, setFilter] = useState<string | null>(null);
+  const { validationId } = useParams<{ validationId: string }>()
+  const [data, setData] = useState<ValidationRunResponse | null>(null)
+  const [error, setError] = useState('')
+  const [filter, setFilter] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!validationId) return;
+    if (!validationId) return
     getValidation(validationId)
       .then(setData)
-      .catch((err) => setError(err.message));
-  }, [validationId]);
+      .catch((err) => setError(err.message))
+  }, [validationId])
 
   if (error) {
     return (
@@ -41,7 +36,7 @@ export default function ResultsPage() {
           <Button variant="secondary">Back to Upload</Button>
         </Link>
       </Card>
-    );
+    )
   }
 
   if (!data) {
@@ -49,23 +44,20 @@ export default function ResultsPage() {
       <div className="flex items-center justify-center py-24">
         <Spinner className="h-8 w-8" />
       </div>
-    );
+    )
   }
 
-  const { summary, issues } = data;
-  const filtered = filter ? issues.filter((i) => i.severity === filter) : issues;
+  const { summary, issues } = data
+  const filtered = filter ? issues.filter((i) => i.severity === filter) : issues
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-ink-900">
-            Validation Results
-          </h1>
+          <h1 className="font-display text-2xl text-ink-900">Validation Results</h1>
           <p className="text-sm text-ink-500 mt-1">
-            {summary.rules_executed} rules executed &middot;{' '}
-            {summary.total_rows} rows analyzed
+            {summary.rules_executed} rules executed &middot; {summary.total_rows} rows analyzed
           </p>
         </div>
         <Link to="/upload">
@@ -133,7 +125,7 @@ export default function ResultsPage() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 /* ─── Summary card ───────────────────────────────────────────────── */
@@ -147,13 +139,13 @@ function SummaryCard({
   onClick,
   active,
 }: {
-  label: string;
-  value: number;
-  icon: typeof CheckCircle2;
-  color: string;
-  bg: string;
-  onClick?: () => void;
-  active?: boolean;
+  label: string
+  value: number
+  icon: typeof CheckCircle2
+  color: string
+  bg: string
+  onClick?: () => void
+  active?: boolean
 }) {
   return (
     <Card
@@ -171,14 +163,14 @@ function SummaryCard({
         <p className="text-xs text-ink-500">{label}</p>
       </div>
     </Card>
-  );
+  )
 }
 
 /* ─── Issue card ─────────────────────────────────────────────────── */
 
 function IssueCard({ issue }: { issue: ValidationIssueSummary }) {
-  const config = SEVERITY_CONFIG[issue.severity];
-  const SevIcon = config.icon;
+  const config = SEVERITY_CONFIG[issue.severity]
+  const SevIcon = config.icon
 
   return (
     <Card className="p-4 flex gap-3">
@@ -207,5 +199,5 @@ function IssueCard({ issue }: { issue: ValidationIssueSummary }) {
         </div>
       </div>
     </Card>
-  );
+  )
 }

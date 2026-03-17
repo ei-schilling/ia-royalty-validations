@@ -1,16 +1,16 @@
 """Validation engine — discovers and orchestrates all validation rule plugins."""
 
 from app.validation.base_rule import BaseRule, ValidationIssue
-from app.validation.rules.missing_titles import MissingTitlesRule
-from app.validation.rules.invalid_rates import InvalidRatesRule
-from app.validation.rules.amount_consistency import AmountConsistencyRule
-from app.validation.rules.tax_validation import TaxValidationRule
-from app.validation.rules.guarantee_validation import GuaranteeValidationRule
-from app.validation.rules.settlement_totals import SettlementTotalsRule
-from app.validation.rules.duplicate_entries import DuplicateEntriesRule
-from app.validation.rules.date_validation import DateValidationRule
 from app.validation.rules.advance_balance import AdvanceBalanceRule
+from app.validation.rules.amount_consistency import AmountConsistencyRule
+from app.validation.rules.date_validation import DateValidationRule
+from app.validation.rules.duplicate_entries import DuplicateEntriesRule
+from app.validation.rules.guarantee_validation import GuaranteeValidationRule
+from app.validation.rules.invalid_rates import InvalidRatesRule
+from app.validation.rules.missing_titles import MissingTitlesRule
 from app.validation.rules.recipient_shares import RecipientSharesRule
+from app.validation.rules.settlement_totals import SettlementTotalsRule
+from app.validation.rules.tax_validation import TaxValidationRule
 from app.validation.rules.transaction_types import TransactionTypesRule
 
 
