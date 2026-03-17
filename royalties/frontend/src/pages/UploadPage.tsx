@@ -56,8 +56,8 @@ export default function UploadPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl text-ink-900">Upload Statement</h1>
-        <p className="text-sm text-ink-500 mt-1">
+        <h1 className="font-display text-2xl text-foreground">Upload Statement</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Upload a CSV, Excel, JSON, or PDF royalty statement file for validation.
         </p>
       </div>
@@ -65,7 +65,7 @@ export default function UploadPage() {
       {/* Drop zone */}
       <Card
         className={`flex flex-col items-center justify-center gap-4 p-12 border-2 border-dashed transition-colors cursor-pointer ${
-          dragging ? 'border-brand-500 bg-brand-50' : 'border-ink-300 hover:border-brand-400'
+          dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'
         }`}
       >
         <div
@@ -77,10 +77,10 @@ export default function UploadPage() {
         >
           {file ? (
             <>
-              <FileIcon className="h-10 w-10 text-brand-600" />
+              <FileIcon className="h-10 w-10 text-primary" />
               <div className="text-center">
-                <p className="font-medium text-ink-800">{file.name}</p>
-                <p className="text-xs text-ink-400 mt-1">
+                <p className="font-medium text-foreground">{file.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">
                   {(file.size / 1024).toFixed(1)} KB &middot; {ext.toUpperCase()}
                 </p>
               </div>
@@ -96,15 +96,17 @@ export default function UploadPage() {
             </>
           ) : (
             <>
-              <Upload className="h-10 w-10 text-ink-300" />
+              <Upload className="h-10 w-10 text-muted-foreground/50" />
               <div className="text-center">
-                <p className="text-sm text-ink-600">
+                <p className="text-sm text-muted-foreground">
                   Drop a file here or{' '}
-                  <span className="text-brand-600 font-medium underline underline-offset-2">
+                  <span className="text-primary font-medium underline underline-offset-2">
                     browse
                   </span>
                 </p>
-                <p className="text-xs text-ink-400 mt-1">CSV, XLSX, JSON, or PDF up to 50 MB</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  CSV, XLSX, JSON, or PDF up to 50 MB
+                </p>
               </div>
             </>
           )}
@@ -121,7 +123,7 @@ export default function UploadPage() {
         />
       </Card>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
         {uploading ? (

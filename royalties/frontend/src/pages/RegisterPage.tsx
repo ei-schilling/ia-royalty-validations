@@ -7,7 +7,8 @@ import { register } from '@/api'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 
 export default function RegisterPage() {
   const [nickname, setNickname] = useState('')
@@ -44,55 +45,69 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
-      <Card className="w-full max-w-md p-8">
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="rounded-full bg-brand-100 p-4">
-            <UserPlus className="h-8 w-8 text-brand-700" />
+      <Card className="w-full max-w-md">
+        <CardHeader className="flex flex-col items-center gap-4">
+          <div className="rounded-full bg-primary/10 p-4">
+            <UserPlus className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl text-ink-900">Create Account</h1>
-          <p className="text-sm text-ink-500 text-center max-w-xs">
+          <h1 className="font-display text-2xl text-foreground">Create Account</h1>
+          <p className="text-sm text-muted-foreground text-center max-w-xs">
             Create a new account to start validating royalty statements.
           </p>
-        </div>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            placeholder="Nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            maxLength={100}
-            autoFocus
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            maxLength={128}
-          />
-          <Input
-            type="password"
-            placeholder="Confirm password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            maxLength={128}
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || !nickname.trim() || !password || !confirm}
-          >
-            {loading ? 'Creating account…' : 'Create Account'}
-          </Button>
-        </form>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname</Label>
+              <Input
+                id="nickname"
+                placeholder="Nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                maxLength={100}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                maxLength={128}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirm password</Label>
+              <Input
+                id="confirm"
+                type="password"
+                placeholder="Confirm password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                maxLength={128}
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !nickname.trim() || !password || !confirm}
+            >
+              {loading ? 'Creating account…' : 'Create Account'}
+            </Button>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-ink-500">
-          Already have an account?{' '}
-          <Link to="/login" className="text-brand-600 font-medium hover:underline">
-            Sign in
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary font-medium hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </CardContent>
       </Card>
     </div>
   )

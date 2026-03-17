@@ -47,6 +47,94 @@
 				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d; docker compose ps"
 			],
 			"isBackground": false
+		},
+		{
+			"label": "shadcn preset",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add --preset aJyjTda --overwrite --yes 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn help",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add --help 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn preset2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add https://ui.shadcn.com/r/aJyjTda.json --overwrite --yes 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn init preset",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest init --preset aJyjTda --yes 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn init force",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest init --preset aJyjTda --yes --force 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn init pipe",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; echo 'y' | npx shadcn@latest init --preset aJyjTda --yes --force 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn init v2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; echo 'y' | npx shadcn@latest init --preset aJyjTda --yes --force 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "shadcn add extras",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add label separator alert --overwrite --yes 2>&1"
+			],
+			"isBackground": false
 		}
 	]
 }

@@ -7,7 +7,8 @@ import { login } from '@/api'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 
 export default function LoginPage() {
   const [nickname, setNickname] = useState('')
@@ -35,48 +36,58 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
-      <Card className="w-full max-w-md p-8">
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="rounded-full bg-brand-100 p-4">
-            <BookOpenCheck className="h-8 w-8 text-brand-700" />
+      <Card className="w-full max-w-md">
+        <CardHeader className="flex flex-col items-center gap-4">
+          <div className="rounded-full bg-primary/10 p-4">
+            <BookOpenCheck className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl text-ink-900">Royalty Statement Validator</h1>
-          <p className="text-sm text-ink-500 text-center max-w-xs">
+          <h1 className="font-display text-2xl text-foreground">Royalty Statement Validator</h1>
+          <p className="text-sm text-muted-foreground text-center max-w-xs">
             Validate royalty settlement files against Schilling ERP business rules.
           </p>
-        </div>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            placeholder="Nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            maxLength={100}
-            autoFocus
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            maxLength={128}
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || !nickname.trim() || !password}
-          >
-            {loading ? 'Signing in…' : 'Sign In'}
-          </Button>
-        </form>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname</Label>
+              <Input
+                id="nickname"
+                placeholder="Nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                maxLength={100}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                maxLength={128}
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !nickname.trim() || !password}
+            >
+              {loading ? 'Signing in…' : 'Sign In'}
+            </Button>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-ink-500">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-brand-600 font-medium hover:underline">
-            Create one
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{' '}
+            <Link to="/register" className="text-primary font-medium hover:underline">
+              Create one
+            </Link>
+          </p>
+        </CardContent>
       </Card>
     </div>
   )

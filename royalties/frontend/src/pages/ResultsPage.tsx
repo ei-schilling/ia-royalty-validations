@@ -7,14 +7,14 @@ import { getValidation } from '@/api'
 import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
 const SEVERITY_CONFIG = {
-  error: { icon: AlertCircle, color: 'error' as const, label: 'Errors' },
-  warning: { icon: AlertTriangle, color: 'warning' as const, label: 'Warnings' },
-  info: { icon: Info, color: 'info' as const, label: 'Info' },
+  error: { icon: AlertCircle, variant: 'destructive' as const, label: 'Errors' },
+  warning: { icon: AlertTriangle, variant: 'outline' as const, label: 'Warnings' },
+  info: { icon: Info, variant: 'secondary' as const, label: 'Info' },
 }
 
 export default function ResultsPage() {
@@ -33,8 +33,8 @@ export default function ResultsPage() {
   if (error) {
     return (
       <Card className="p-8 text-center">
-        <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-3" />
-        <p className="text-sm text-red-600">{error}</p>
+        <AlertCircle className="mx-auto h-8 w-8 text-destructive mb-3" />
+        <p className="text-sm text-destructive">{error}</p>
         <Link to="/upload" className="mt-4 inline-block">
           <Button variant="secondary">Back to Upload</Button>
         </Link>
@@ -58,8 +58,8 @@ export default function ResultsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-ink-900">Validation Results</h1>
-          <p className="text-sm text-ink-500 mt-1">
+          <h1 className="font-display text-2xl text-foreground">Validation Results</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             {summary.rules_executed} rules executed &middot; {summary.total_rows} rows analyzed
           </p>
         </div>
@@ -76,15 +76,15 @@ export default function ResultsPage() {
           label="Passed"
           value={summary.passed_checks}
           icon={CheckCircle2}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
+          color="text-emerald-400"
+          bg="bg-emerald-500/10"
         />
         <SummaryCard
           label="Errors"
           value={summary.errors}
           icon={AlertCircle}
-          color="text-red-600"
-          bg="bg-red-50"
+          color="text-red-400"
+          bg="bg-red-500/10"
           onClick={() => setFilter(filter === 'error' ? null : 'error')}
           active={filter === 'error'}
         />
@@ -92,8 +92,8 @@ export default function ResultsPage() {
           label="Warnings"
           value={summary.warnings}
           icon={AlertTriangle}
-          color="text-amber-600"
-          bg="bg-amber-50"
+          color="text-amber-400"
+          bg="bg-amber-500/10"
           onClick={() => setFilter(filter === 'warning' ? null : 'warning')}
           active={filter === 'warning'}
         />
@@ -101,8 +101,8 @@ export default function ResultsPage() {
           label="Info"
           value={summary.infos}
           icon={Info}
-          color="text-sky-600"
-          bg="bg-sky-50"
+          color="text-sky-400"
+          bg="bg-sky-500/10"
           onClick={() => setFilter(filter === 'info' ? null : 'info')}
           active={filter === 'info'}
         />
@@ -111,14 +111,14 @@ export default function ResultsPage() {
       {/* Issues list */}
       {filtered.length === 0 ? (
         <Card className="p-8 text-center">
-          <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-3" />
-          <p className="text-ink-600 font-medium">
+          <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400 mb-3" />
+          <p className="text-muted-foreground font-medium">
             {filter ? 'No issues at this severity level' : 'No issues found — all checks passed!'}
           </p>
         </Card>
       ) : (
         <div className="space-y-3">
-          <p className="text-xs text-ink-400 font-mono">
+          <p className="text-xs text-muted-foreground font-mono">
             {filtered.length} issue{filtered.length !== 1 ? 's' : ''}
             {filter && ` (${filter})`}
           </p>
@@ -153,18 +153,21 @@ function SummaryCard({
   return (
     <Card
       className={cn(
-        'p-4 flex items-center gap-3 transition-all',
+        'transition-all',
         onClick && 'cursor-pointer hover:shadow-md',
-        active && 'ring-2 ring-brand-500 ring-offset-2',
+        active && 'ring-2 ring-primary ring-offset-2',
       )}
+      onClick={onClick}
     >
-      <div className={cn('rounded-lg p-2', bg)} onClick={onClick}>
-        <Icon className={cn('h-5 w-5', color)} />
-      </div>
-      <div onClick={onClick}>
-        <p className="text-2xl font-bold text-ink-900 font-mono">{value}</p>
-        <p className="text-xs text-ink-500">{label}</p>
-      </div>
+      <CardContent className="flex items-center gap-3 py-4">
+        <div className={cn('rounded-lg p-2', bg)}>
+          <Icon className={cn('h-5 w-5', color)} />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-foreground font-mono">{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
     </Card>
   )
 }
@@ -178,25 +181,25 @@ function IssueCard({ issue }: { issue: ValidationIssueSummary }) {
   return (
     <Card className="p-4 flex gap-3">
       <div className="pt-0.5">
-        <Badge variant={config.color}>
+        <Badge variant={config.variant}>
           <SevIcon className="h-3 w-3 mr-1" />
           {issue.severity}
         </Badge>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-ink-800 font-medium">{issue.message}</p>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-ink-400">
+        <p className="text-sm text-foreground font-medium">{issue.message}</p>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
           <span className="font-mono">{issue.rule_id}</span>
           {issue.row_number != null && <span>Row {issue.row_number}</span>}
           {issue.field && <span>Field: {issue.field}</span>}
           {issue.expected_value && (
             <span>
-              Expected: <span className="text-ink-600">{issue.expected_value}</span>
+              Expected: <span className="text-foreground">{issue.expected_value}</span>
             </span>
           )}
           {issue.actual_value && (
             <span>
-              Actual: <span className="text-ink-600">{issue.actual_value}</span>
+              Actual: <span className="text-foreground">{issue.actual_value}</span>
             </span>
           )}
         </div>
