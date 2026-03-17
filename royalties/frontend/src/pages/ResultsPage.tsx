@@ -220,37 +220,25 @@ export default function ResultsPage() {
         </Link>
       </div>
 
-      {/* Pass rate hero + metric cards */}
-      <div className="grid grid-cols-12 gap-4">
+      {/* Stats strip */}
+      <div className="grid grid-cols-5 gap-3">
+        {/* Pass rate */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
           className={cn(
-            'col-span-12 sm:col-span-4 rounded-2xl border p-6 flex flex-col items-center justify-center gap-3',
+            'rounded-xl border p-4 flex flex-col items-center justify-center gap-2',
             hasIssues
               ? 'border-border/50 bg-card'
-              : 'border-emerald-500/20 bg-emerald-500/5 glow-success',
+              : 'border-emerald-500/20 bg-emerald-500/5',
           )}
         >
-          <div className="relative w-28 h-28">
+          <div className="relative w-16 h-16">
             <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="6"
-                className="text-border/30"
-              />
+              <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-border/30" />
               <motion.circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                strokeWidth="6"
-                strokeLinecap="round"
+                cx="50" cy="50" r="42" fill="none" strokeWidth="8" strokeLinecap="round"
                 className={hasIssues ? 'text-primary' : 'text-emerald-400'}
                 strokeDasharray={`${2 * Math.PI * 42}`}
                 initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
@@ -259,70 +247,35 @@ export default function ResultsPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-display text-3xl font-bold text-foreground">{passRate}%</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                pass rate
-              </span>
+              <span className="font-display text-lg font-bold text-foreground leading-none">{passRate}%</span>
             </div>
           </div>
-          <p
-            className={cn(
-              'text-xs font-semibold',
-              hasIssues ? 'text-muted-foreground' : 'text-emerald-400',
-            )}
-          >
-            {hasIssues
-              ? `${summary.passed_checks} of ${summary.rules_executed} checks passed`
-              : 'All checks passed'}
+          <p className={cn('text-[10px] font-medium text-center leading-tight', hasIssues ? 'text-muted-foreground' : 'text-emerald-400')}>
+            {summary.passed_checks}/{summary.rules_executed} passed
           </p>
         </motion.div>
 
-        <div className="col-span-12 sm:col-span-8 grid grid-cols-4 gap-3">
-          <MetricCard
-            label="Passed"
-            value={summary.passed_checks}
-            subtitle="Rules with no errors"
-            icon={CheckCircle2}
-            color="text-emerald-400"
-            bg="bg-emerald-500/10"
-            onClick={() => toggleSection('passed')}
-            active={openSections.passed}
-            delay={0.15}
-          />
-          <MetricCard
-            label="Errors"
-            value={summary.errors}
-            subtitle="Critical issues found"
-            icon={AlertCircle}
-            color="text-red-400"
-            bg="bg-red-500/10"
-            onClick={() => toggleSection('error')}
-            active={openSections.error}
-            delay={0.2}
-          />
-          <MetricCard
-            label="Warnings"
-            value={summary.warnings}
-            subtitle="Possible problems"
-            icon={AlertTriangle}
-            color="text-amber-400"
-            bg="bg-amber-500/10"
-            onClick={() => toggleSection('warning')}
-            active={openSections.warning}
-            delay={0.25}
-          />
-          <MetricCard
-            label="Info"
-            value={summary.infos}
-            subtitle="Observations"
-            icon={Info}
-            color="text-sky-400"
-            bg="bg-sky-500/10"
-            onClick={() => toggleSection('info')}
-            active={openSections.info}
-            delay={0.3}
-          />
-        </div>
+        {/* Metric cards */}
+        <MetricCard
+          label="Passed" value={summary.passed_checks} subtitle="No errors"
+          icon={CheckCircle2} color="text-emerald-400" bg="bg-emerald-500/10"
+          onClick={() => toggleSection('passed')} active={openSections.passed} delay={0.15}
+        />
+        <MetricCard
+          label="Errors" value={summary.errors} subtitle="Critical"
+          icon={AlertCircle} color="text-red-400" bg="bg-red-500/10"
+          onClick={() => toggleSection('error')} active={openSections.error} delay={0.2}
+        />
+        <MetricCard
+          label="Warnings" value={summary.warnings} subtitle="Review needed"
+          icon={AlertTriangle} color="text-amber-400" bg="bg-amber-500/10"
+          onClick={() => toggleSection('warning')} active={openSections.warning} delay={0.25}
+        />
+        <MetricCard
+          label="Info" value={summary.infos} subtitle="Observations"
+          icon={Info} color="text-sky-400" bg="bg-sky-500/10"
+          onClick={() => toggleSection('info')} active={openSections.info} delay={0.3}
+        />
       </div>
 
       {/* ── Collapsible sections ─────────────────────── */}
@@ -348,14 +301,12 @@ export default function ResultsPage() {
       )}
 
       {/* Info */}
-      {infoIssues.length > 0 && (
-        <IssueSection
-          severity="info"
-          issues={infoIssues}
-          open={openSections.info}
-          onToggle={() => toggleSection('info')}
-        />
-      )}
+      <IssueSection
+        severity="info"
+        issues={infoIssues}
+        open={openSections.info}
+        onToggle={() => toggleSection('info')}
+      />
 
       {/* Passed Rules */}
       <div>
@@ -494,7 +445,19 @@ function IssueSection({
             className="overflow-hidden"
           >
             <div className="space-y-4">
-              {[...ruleGroups.entries()].map(([ruleId, group], gi) => (
+              {issues.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className={cn('flex items-center gap-3 px-4 py-3 rounded-lg border', config.border, config.bg)}
+                >
+                  <SevIcon className={cn('h-4 w-4 shrink-0', config.color)} />
+                  <p className="text-sm text-muted-foreground">
+                    No {config.label.toLowerCase()} for this document.
+                  </p>
+                </motion.div>
+              ) : (
+              [...ruleGroups.entries()].map(([ruleId, group], gi) => (
                 <motion.div
                   key={ruleId}
                   initial={{ opacity: 0, y: 6 }}
@@ -519,7 +482,8 @@ function IssueSection({
                     ))}
                   </div>
                 </motion.div>
-              ))}
+              ))
+              )}
             </div>
           </motion.div>
         )}
@@ -558,29 +522,19 @@ function MetricCard({
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
       className={cn(
-        'rounded-xl border p-3 transition-all duration-200',
+        'rounded-xl border p-4 flex flex-col items-center text-center transition-all duration-200',
         onClick && 'cursor-pointer hover:border-primary/30',
         active
           ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
           : 'border-border/50 bg-card',
       )}
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center', bg)}>
-          <Icon className={cn('h-3.5 w-3.5', color)} />
-        </div>
-        {onClick && (
-          <ChevronRight
-            className={cn(
-              'h-3 w-3 text-muted-foreground/50 transition-transform',
-              active && 'rotate-90 text-primary',
-            )}
-          />
-        )}
+      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-3', bg)}>
+        <Icon className={cn('h-4 w-4', color)} />
       </div>
       <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
-      <p className="text-[11px] text-muted-foreground mt-1">{label}</p>
-      <p className="text-[10px] text-muted-foreground/50 mt-0.5 leading-tight">{subtitle}</p>
+      <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
+      <p className="text-[10px] text-muted-foreground/50 mt-0.5">{subtitle}</p>
     </motion.div>
   )
 }
