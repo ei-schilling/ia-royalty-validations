@@ -17,8 +17,9 @@ import {
   Target,
   Diff,
   CircleCheck,
+  FileDown,
 } from 'lucide-react'
-import { getValidation } from '@/api'
+import { getValidation, downloadValidationPdf } from '@/api'
 import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -123,6 +124,7 @@ export default function ResultsPage() {
   const { validationId } = useParams<{ validationId: string }>()
   const [data, setData] = useState<ValidationRunResponse | null>(null)
   const [error, setError] = useState('')
+  const [downloading, setDownloading] = useState(false)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     error: true,
     warning: false,
@@ -211,13 +213,35 @@ export default function ResultsPage() {
             </span>
           </div>
         </div>
-        <Link to="/upload">
-          <Button variant="outline" size="sm" className="gap-1.5 group">
-            <Upload className="h-3.5 w-3.5" />
-            New Upload
-            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 group"
+            disabled={downloading}
+            onClick={async () => {
+              if (!validationId) return
+              setDownloading(true)
+              try {
+                await downloadValidationPdf(validationId)
+              } catch {
+                // silently fail — user can retry
+              } finally {
+                setDownloading(false)
+              }
+            }}
+          >
+            <FileDown className={cn('h-3.5 w-3.5', downloading && 'animate-bounce')} />
+            {downloading ? 'Generating…' : 'Export Validation'}
           </Button>
-        </Link>
+          <Link to="/upload">
+            <Button variant="outline" size="sm" className="gap-1.5 group">
+              <Upload className="h-3.5 w-3.5" />
+              New Upload
+              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats strip */}

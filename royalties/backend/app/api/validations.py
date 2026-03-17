@@ -4,6 +4,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -20,6 +21,7 @@ from app.schemas.validation import (
     ValidationSummary,
 )
 from app.services.validation_service import run_validation
+from app.services.pdf_service import generate_validation_pdf
 
 router = APIRouter(prefix="/api/validations", tags=["validations"])
 
@@ -102,3 +104,56 @@ async def get_validation_issues(
 
     result = await db.execute(query)
     return list(result.scalars().all())
+
+
+@router.get("/{validation_id}/pdf")
+async def download_validation_pdf(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession,
+) -> Response:
+    """Generate and return a PDF report for a validation run."""
+    result = await db.execute(
+        select(ValidationRun)
+        .where(ValidationRun.id == validation_id)
+        .options(selectinload(ValidationRun.issues), selectinload(ValidationRun.upload))
+    )
+    run = result.scalars().first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Validation run not found")
+
+    filename = run.upload.filename if run.upload else "unknown"
+    total_rows = run.upload.row_count or 0 if run.upload else 0
+
+    issues_dicts = [
+        {
+            "severity": issue.severity,
+            "rule_id": issue.rule_id,
+            "rule_description": issue.rule_description,
+            "row_number": issue.row_number,
+            "field": issue.field,
+            "expected_value": issue.expected_value,
+            "actual_value": issue.actual_value,
+            "message": issue.message,
+        }
+        for issue in run.issues
+    ]
+
+    pdf_bytes = generate_validation_pdf(
+        filename=filename,
+        validation_id=str(validation_id),
+        started_at=run.started_at,
+        completed_at=run.completed_at,
+        total_rows=total_rows,
+        rules_executed=run.rules_executed,
+        passed_checks=run.passed_count,
+        errors=run.error_count,
+        warnings=run.warning_count,
+        infos=run.info_count,
+        issues=issues_dicts,
+    )
+
+    safe_name = filename.rsplit(".", 1)[0] if "." in filename else filename
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'},
+    )

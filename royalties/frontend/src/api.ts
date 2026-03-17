@@ -91,3 +91,27 @@ export function getValidationIssues(validationId: string, page = 1, size = 50, s
   if (severity) params.set('severity', severity)
   return request<ValidationIssueSummary[]>(`/validations/${validationId}/issues?${params}`)
 }
+
+/** Download validation report as PDF. */
+export async function downloadValidationPdf(validationId: string) {
+  const token = getToken()
+  const res = await fetch(`${BASE}/validations/${validationId}/pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(body.detail ?? `HTTP ${res.status}`)
+  }
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition')
+  const match = disposition?.match(/filename="?([^"]+)"?/)
+  const filename = match?.[1] ?? `validation_${validationId}.pdf`
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
