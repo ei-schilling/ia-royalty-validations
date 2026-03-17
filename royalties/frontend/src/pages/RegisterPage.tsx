@@ -2,12 +2,12 @@
 
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { UserPlus } from 'lucide-react'
+import { motion } from 'motion/react'
+import { ArrowRight, UserPlus } from 'lucide-react'
 import { register } from '@/api'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 
 export default function RegisterPage() {
@@ -43,72 +43,136 @@ export default function RegisterPage() {
     }
   }
 
+  const strength = password.length === 0 ? 0 : password.length < 4 ? 1 : password.length < 8 ? 2 : 3
+  const strengthLabel = ['', 'Weak', 'Fair', 'Strong'][strength]
+  const strengthColor = ['', 'bg-destructive', 'bg-amber-500', 'bg-emerald-500'][strength]
+
   return (
-    <div className="flex min-h-[70vh] items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-col items-center gap-4">
-          <div className="rounded-full bg-primary/10 p-4">
-            <UserPlus className="h-8 w-8 text-primary" />
+    <div className="min-h-[85vh] flex items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-sm"
+      >
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <UserPlus className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="font-display text-2xl text-foreground">Create Account</h1>
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Create a new account to start validating royalty statements.
-          </p>
-        </CardHeader>
+          <div>
+            <h1 className="font-display text-xl font-bold text-foreground">Create Account</h1>
+            <p className="text-xs text-muted-foreground">Get started with Royalty Validator</p>
+          </div>
+        </div>
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname</Label>
-              <Input
-                id="nickname"
-                placeholder="Nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                maxLength={100}
-                autoFocus
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                maxLength={128}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm">Confirm password</Label>
-              <Input
-                id="confirm"
-                type="password"
-                placeholder="Confirm password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                maxLength={128}
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || !nickname.trim() || !password || !confirm}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label
+              htmlFor="nickname"
+              className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
             >
-              {loading ? 'Creating account…' : 'Create Account'}
-            </Button>
-          </form>
+              Nickname
+            </Label>
+            <Input
+              id="nickname"
+              placeholder="Choose a nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={100}
+              autoFocus
+              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label
+              htmlFor="password"
+              className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+            >
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              maxLength={128}
+              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+            />
+            {password.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="flex items-center gap-2 pt-1"
+              >
+                <div className="flex gap-1 flex-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                        i <= strength ? strengthColor : 'bg-border'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] text-muted-foreground font-mono">{strengthLabel}</span>
+              </motion.div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label
+              htmlFor="confirm"
+              className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+            >
+              Confirm password
+            </Label>
+            <Input
+              id="confirm"
+              type="password"
+              placeholder="Confirm your password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              maxLength={128}
+              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+            />
+          </div>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2"
+            >
+              {error}
+            </motion.p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full h-11 font-semibold gap-2 group"
+            disabled={loading || !nickname.trim() || !password || !confirm}
+          >
+            {loading ? (
+              'Creating account…'
+            ) : (
+              <>
+                Create Account
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </>
+            )}
+          </Button>
+        </form>
+
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <Link
+            to="/login"
+            className="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Sign in
+          </Link>
+        </p>
+      </motion.div>
     </div>
   )
 }
