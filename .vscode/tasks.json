@@ -7,6 +7,46 @@
 			"command": "cd royalties/frontend && npx vite --port 5173",
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Start Backend Dev",
+			"type": "shell",
+			"command": "C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\.venv\\Scripts\\python.exe",
+			"args": [
+				"C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\run_dev.py"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Backend Dev Server",
+			"type": "shell",
+			"command": "cmd.exe",
+			"args": [
+				"/c",
+				"cd /d C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend && .venv\\Scripts\\python.exe run_dev.py"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Backend Dev",
+			"type": "shell",
+			"command": "C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\start_dev.bat",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Docker Compose Up",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d; docker compose ps"
+			],
+			"isBackground": false
 		}
 	]
 }
