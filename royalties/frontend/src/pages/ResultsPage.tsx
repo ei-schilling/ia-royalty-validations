@@ -229,16 +229,27 @@ export default function ResultsPage() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className={cn(
             'rounded-xl border p-4 flex flex-col items-center justify-center gap-2',
-            hasIssues
-              ? 'border-border/50 bg-card'
-              : 'border-emerald-500/20 bg-emerald-500/5',
+            hasIssues ? 'border-border/50 bg-card' : 'border-emerald-500/20 bg-emerald-500/5',
           )}
         >
           <div className="relative w-16 h-16">
             <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-border/30" />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="8"
+                className="text-border/30"
+              />
               <motion.circle
-                cx="50" cy="50" r="42" fill="none" strokeWidth="8" strokeLinecap="round"
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                strokeWidth="8"
+                strokeLinecap="round"
                 className={hasIssues ? 'text-primary' : 'text-emerald-400'}
                 strokeDasharray={`${2 * Math.PI * 42}`}
                 initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
@@ -247,34 +258,65 @@ export default function ResultsPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-display text-lg font-bold text-foreground leading-none">{passRate}%</span>
+              <span className="font-display text-lg font-bold text-foreground leading-none">
+                {passRate}%
+              </span>
             </div>
           </div>
-          <p className={cn('text-[10px] font-medium text-center leading-tight', hasIssues ? 'text-muted-foreground' : 'text-emerald-400')}>
+          <p
+            className={cn(
+              'text-[10px] font-medium text-center leading-tight',
+              hasIssues ? 'text-muted-foreground' : 'text-emerald-400',
+            )}
+          >
             {summary.passed_checks}/{summary.rules_executed} passed
           </p>
         </motion.div>
 
         {/* Metric cards */}
         <MetricCard
-          label="Passed" value={summary.passed_checks} subtitle="No errors"
-          icon={CheckCircle2} color="text-emerald-400" bg="bg-emerald-500/10"
-          onClick={() => toggleSection('passed')} active={openSections.passed} delay={0.15}
+          label="Passed"
+          value={summary.passed_checks}
+          subtitle="No errors"
+          icon={CheckCircle2}
+          color="text-emerald-400"
+          bg="bg-emerald-500/10"
+          onClick={() => toggleSection('passed')}
+          active={openSections.passed}
+          delay={0.15}
         />
         <MetricCard
-          label="Errors" value={summary.errors} subtitle="Critical"
-          icon={AlertCircle} color="text-red-400" bg="bg-red-500/10"
-          onClick={() => toggleSection('error')} active={openSections.error} delay={0.2}
+          label="Errors"
+          value={summary.errors}
+          subtitle="Critical"
+          icon={AlertCircle}
+          color="text-red-400"
+          bg="bg-red-500/10"
+          onClick={() => toggleSection('error')}
+          active={openSections.error}
+          delay={0.2}
         />
         <MetricCard
-          label="Warnings" value={summary.warnings} subtitle="Review needed"
-          icon={AlertTriangle} color="text-amber-400" bg="bg-amber-500/10"
-          onClick={() => toggleSection('warning')} active={openSections.warning} delay={0.25}
+          label="Warnings"
+          value={summary.warnings}
+          subtitle="Review needed"
+          icon={AlertTriangle}
+          color="text-amber-400"
+          bg="bg-amber-500/10"
+          onClick={() => toggleSection('warning')}
+          active={openSections.warning}
+          delay={0.25}
         />
         <MetricCard
-          label="Info" value={summary.infos} subtitle="Observations"
-          icon={Info} color="text-sky-400" bg="bg-sky-500/10"
-          onClick={() => toggleSection('info')} active={openSections.info} delay={0.3}
+          label="Info"
+          value={summary.infos}
+          subtitle="Observations"
+          icon={Info}
+          color="text-sky-400"
+          bg="bg-sky-500/10"
+          onClick={() => toggleSection('info')}
+          active={openSections.info}
+          delay={0.3}
         />
       </div>
 
@@ -449,7 +491,11 @@ function IssueSection({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={cn('flex items-center gap-3 px-4 py-3 rounded-lg border', config.border, config.bg)}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-lg border',
+                    config.border,
+                    config.bg,
+                  )}
                 >
                   <SevIcon className={cn('h-4 w-4 shrink-0', config.color)} />
                   <p className="text-sm text-muted-foreground">
@@ -457,32 +503,32 @@ function IssueSection({
                   </p>
                 </motion.div>
               ) : (
-              [...ruleGroups.entries()].map(([ruleId, group], gi) => (
-                <motion.div
-                  key={ruleId}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: gi * 0.05, duration: 0.25 }}
-                >
-                  {/* Rule header */}
-                  <div className={cn('flex items-start gap-2 mb-2 px-1')}>
-                    <SevIcon className={cn('h-3.5 w-3.5 mt-0.5 shrink-0', config.color)} />
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">{group.description}</p>
-                      <p className="text-[10px] text-muted-foreground/50">
-                        {formatRuleId(ruleId)} · {group.issues.length} occurrence
-                        {group.issues.length !== 1 ? 's' : ''}
-                      </p>
+                [...ruleGroups.entries()].map(([ruleId, group], gi) => (
+                  <motion.div
+                    key={ruleId}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: gi * 0.05, duration: 0.25 }}
+                  >
+                    {/* Rule header */}
+                    <div className={cn('flex items-start gap-2 mb-2 px-1')}>
+                      <SevIcon className={cn('h-3.5 w-3.5 mt-0.5 shrink-0', config.color)} />
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">{group.description}</p>
+                        <p className="text-[10px] text-muted-foreground/50">
+                          {formatRuleId(ruleId)} · {group.issues.length} occurrence
+                          {group.issues.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  {/* Individual issues */}
-                  <div className="space-y-1.5">
-                    {group.issues.map((issue, i) => (
-                      <IssueCard key={issue.id} issue={issue} index={i} severity={severity} />
-                    ))}
-                  </div>
-                </motion.div>
-              ))
+                    {/* Individual issues */}
+                    <div className="space-y-1.5">
+                      {group.issues.map((issue, i) => (
+                        <IssueCard key={issue.id} issue={issue} index={i} severity={severity} />
+                      ))}
+                    </div>
+                  </motion.div>
+                ))
               )}
             </div>
           </motion.div>
