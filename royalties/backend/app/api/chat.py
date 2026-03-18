@@ -148,7 +148,9 @@ async def _stream_sse(messages: list[dict]) -> AsyncGenerator[str, None]:
     yield f"data: {json.dumps({'type': 'RUN_STARTED', 'runId': run_id, 'timestamp': ts})}\n\n"
     yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_START', 'messageId': msg_id, 'role': 'assistant', 'timestamp': ts})}\n\n"
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    timeout = httpx.Timeout(connect=30.0, read=300.0, write=30.0, pool=30.0)
+    got_content = False
+    async with httpx.AsyncClient(timeout=timeout) as client:
         try:
             async with client.stream(
                 "POST",
@@ -185,19 +187,26 @@ async def _stream_sse(messages: list[dict]) -> AsyncGenerator[str, None]:
                         is_error = data.get("error")
 
                         if is_error and isinstance(is_error, str):
-                            yield f"data: {json.dumps({'type': 'RUN_ERROR', 'runId': run_id, 'timestamp': int(time.time() * 1000), 'error': {'message': is_error}})}\n\n"
-                            return
+                            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': f'\\n\\n⚠️ Error: {is_error}'})}\n\n"
+                            break
 
                         if text:
+                            got_content = True
                             yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': text})}\n\n"
 
                         if is_close:
                             break
 
         except httpx.ConnectError:
-            yield f"data: {json.dumps({'type': 'RUN_ERROR', 'runId': run_id, 'timestamp': int(time.time() * 1000), 'error': {'message': 'Cannot connect to AnythingLLM service'}})}\n\n"
-            return
+            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '⚠️ Cannot connect to the AI service. Please try again later.'})}\n\n"
+        except (httpx.RemoteProtocolError, httpx.ReadTimeout) as exc:
+            if not got_content:
+                yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': f'⚠️ The AI service timed out or dropped the connection. Please try again.'})}\n\n"
+        except Exception:
+            if not got_content:
+                yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '⚠️ An unexpected error occurred. Please try again.'})}\n\n"
 
+    # Always close the message and run so the frontend exits loading state
     end_ts = int(time.time() * 1000)
     yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_END', 'messageId': msg_id, 'timestamp': end_ts})}\n\n"
     yield f"data: {json.dumps({'type': 'RUN_FINISHED', 'runId': run_id, 'timestamp': end_ts, 'finishReason': 'stop'})}\n\n"
