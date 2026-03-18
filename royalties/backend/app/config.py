@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     amount_tolerance: float = 0.01
     max_rate_threshold: float = 1.00
+    jwt_secret: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 480
 
     model_config = {"env_prefix": "", "env_file": ".env", "extra": "ignore"}
 

@@ -1,11 +1,10 @@
 """Upload model for tracking uploaded royalty statement files."""
 
 import uuid
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 
 from typing import Optional
-from sqlalchemy import String, Integer, DateTime, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -21,7 +20,7 @@ class Upload(Base):
     file_format: Mapped[str] = mapped_column(String(10))  # csv, xlsx, json, pdf
     row_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     uploaded_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
 
     user = relationship("User", back_populates="uploads")

@@ -3,12 +3,14 @@
 
 from typing import Optional
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field as dataclass_field
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from enum import Enum
 
 
 class Severity(Enum):
     """Severity levels for validation issues."""
+
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
@@ -17,6 +19,7 @@ class Severity(Enum):
 @dataclass
 class ValidationIssue:
     """A single validation issue found during a rule check."""
+
     severity: Severity
     rule_id: str
     rule_description: str

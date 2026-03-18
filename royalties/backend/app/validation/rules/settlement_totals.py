@@ -1,7 +1,6 @@
 """Rule 6: Settlement Totals — validates that per-page and overall totals balance."""
 
 from app.validation.base_rule import BaseRule, Severity, ValidationIssue
-from app.config import settings
 
 
 class SettlementTotalsRule(BaseRule):
@@ -58,38 +57,42 @@ class SettlementTotalsRule(BaseRule):
 
                         # Verify base matches sales total
                         if abs(base - sales_total) > 1.0:
-                            issues.append(ValidationIssue(
-                                severity=Severity.ERROR,
-                                rule_id=self.rule_id,
-                                rule_description=self.description,
-                                row_number=row_num,
-                                field="fordeling_base",
-                                expected_value=f"{sales_total:.2f}",
-                                actual_value=f"{base:.2f}",
-                                message=(
-                                    f"Page {page_num}: Fordeling base ({base:.2f}) "
-                                    f"doesn't match sales total ({sales_total:.2f})"
-                                ),
-                                context={"page": page_num, "aftale": summary.get("aftale", "")},
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    severity=Severity.ERROR,
+                                    rule_id=self.rule_id,
+                                    rule_description=self.description,
+                                    row_number=row_num,
+                                    field="fordeling_base",
+                                    expected_value=f"{sales_total:.2f}",
+                                    actual_value=f"{base:.2f}",
+                                    message=(
+                                        f"Page {page_num}: Fordeling base ({base:.2f}) "
+                                        f"doesn't match sales total ({sales_total:.2f})"
+                                    ),
+                                    context={"page": page_num, "aftale": summary.get("aftale", "")},
+                                )
+                            )
 
-                        # Verify fordeling amount = base × pct
+                        # Verify fordeling amount = base * pct
                         expected_ford = base * pct
                         if abs(expected_ford - declared_ford) > 1.0:
-                            issues.append(ValidationIssue(
-                                severity=Severity.ERROR,
-                                rule_id=self.rule_id,
-                                rule_description=self.description,
-                                row_number=row_num,
-                                field="fordeling_amount",
-                                expected_value=f"{expected_ford:.2f}",
-                                actual_value=f"{declared_ford:.2f}",
-                                message=(
-                                    f"Page {page_num}: Fordeling amount ({declared_ford:.2f}) "
-                                    f"≠ base ({base:.2f}) × rate ({pct:.1%}) = {expected_ford:.2f}"
-                                ),
-                                context={"page": page_num, "aftale": summary.get("aftale", "")},
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    severity=Severity.ERROR,
+                                    rule_id=self.rule_id,
+                                    rule_description=self.description,
+                                    row_number=row_num,
+                                    field="fordeling_amount",
+                                    expected_value=f"{expected_ford:.2f}",
+                                    actual_value=f"{declared_ford:.2f}",
+                                    message=(
+                                        f"Page {page_num}: Fordeling amount ({declared_ford:.2f}) "
+                                        f"!= base ({base:.2f}) * rate ({pct:.1%}) = {expected_ford:.2f}"
+                                    ),
+                                    context={"page": page_num, "aftale": summary.get("aftale", "")},
+                                )
+                            )
 
                         # Verify final payout chain
                         # Formula: (fordeling + overfort_fra_previous + garanti - carry_forward_to_next)

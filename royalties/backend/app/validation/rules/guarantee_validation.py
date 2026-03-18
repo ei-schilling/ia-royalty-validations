@@ -41,37 +41,41 @@ class GuaranteeValidationRule(BaseRule):
 
             # Guarantee should be a negative deduction (or zero)
             if garanti_val > 0:
-                issues.append(ValidationIssue(
-                    severity=Severity.WARNING,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="rest_garanti",
-                    expected_value="<= 0",
-                    actual_value=str(garanti_val),
-                    message=f"Global guarantee is positive ({garanti_val}) — expected a deduction",
-                    context={"aftale": row.get("aftale", "")},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="rest_garanti",
+                        expected_value="<= 0",
+                        actual_value=str(garanti_val),
+                        message=f"Global guarantee is positive ({garanti_val}) — expected a deduction",
+                        context={"aftale": row.get("aftale", "")},
+                    )
+                )
 
             # Check if payout went negative (impossible state)
             if udbetaling:
                 try:
                     payout = float(udbetaling)
                     if payout < 0:
-                        issues.append(ValidationIssue(
-                            severity=Severity.ERROR,
-                            rule_id=self.rule_id,
-                            rule_description=self.description,
-                            row_number=row_num,
-                            field="til_udbetaling",
-                            expected_value=">= 0",
-                            actual_value=str(payout),
-                            message="Payout is negative after guarantee deduction — impossible state",
-                            context={
-                                "aftale": row.get("aftale", ""),
-                                "rest_garanti": str(garanti_val),
-                            },
-                        ))
+                        issues.append(
+                            ValidationIssue(
+                                severity=Severity.ERROR,
+                                rule_id=self.rule_id,
+                                rule_description=self.description,
+                                row_number=row_num,
+                                field="til_udbetaling",
+                                expected_value=">= 0",
+                                actual_value=str(payout),
+                                message="Payout is negative after guarantee deduction — impossible state",
+                                context={
+                                    "aftale": row.get("aftale", ""),
+                                    "rest_garanti": str(garanti_val),
+                                },
+                            )
+                        )
                 except (ValueError, TypeError):
                     pass
 
@@ -96,19 +100,21 @@ class GuaranteeValidationRule(BaseRule):
 
         for aftale, guar_amount in guarantees.items():
             if aftale not in offsets:
-                issues.append(ValidationIssue(
-                    severity=Severity.WARNING,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=None,
-                    field="guarantee/offset",
-                    expected_value="matching offset",
-                    actual_value="no offset found",
-                    message=(
-                        f"Guarantee for agreement {aftale} ({guar_amount:.2f}) "
-                        "has no matching offset in this file — may exist in prior settlements"
-                    ),
-                    context={"aftale": aftale},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=None,
+                        field="guarantee/offset",
+                        expected_value="matching offset",
+                        actual_value="no offset found",
+                        message=(
+                            f"Guarantee for agreement {aftale} ({guar_amount:.2f}) "
+                            "has no matching offset in this file — may exist in prior settlements"
+                        ),
+                        context={"aftale": aftale},
+                    )
+                )
 
         return issues

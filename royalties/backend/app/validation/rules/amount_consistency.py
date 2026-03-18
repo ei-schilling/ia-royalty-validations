@@ -1,11 +1,11 @@
-"""Rule 3: Amount Consistency — validates quantity × price × rate ≈ reported amount."""
+"""Rule 3: Amount Consistency -- validates quantity x price x rate ~ reported amount."""
 
-from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 from app.config import settings
+from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 
 
 class AmountConsistencyRule(BaseRule):
-    """Validates that quantity × price × rate equals the reported royalty amount."""
+    """Validates that quantity x price x rate equals the reported royalty amount."""
 
     @property
     def rule_id(self) -> str:
@@ -13,7 +13,7 @@ class AmountConsistencyRule(BaseRule):
 
     @property
     def description(self) -> str:
-        return "Quantity × Unit Price × Rate must equal the reported royalty amount"
+        return "Quantity x Unit Price x Rate must equal the reported royalty amount"
 
     def validate(self, statement_data: list[dict]) -> list[ValidationIssue]:
         issues = []
@@ -55,53 +55,53 @@ class AmountConsistencyRule(BaseRule):
                 continue
 
             # Calculate expected amount
-            if sats_type == "fixed":
-                expected = qty * rate
-            else:
-                expected = qty * price * rate
+            expected = qty * rate if sats_type == "fixed" else qty * price * rate
 
             diff = abs(expected - actual_amount)
-            tolerance = max(settings.amount_tolerance, abs(expected) * 0.001)
 
             if diff > 1.0:
                 # Large divergence — could be staircase rates or other adjustments
-                issues.append(ValidationIssue(
-                    severity=Severity.INFO,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="beloeb",
-                    expected_value=f"{expected:.2f}",
-                    actual_value=f"{actual_amount:.2f}",
-                    message=(
-                        f"Amount differs by {diff:.2f}. "
-                        "May use staircase rates, depreciation, or other adjustments — verify manually"
-                    ),
-                    context={
-                        "qty": str(qty),
-                        "price": str(price),
-                        "rate": str(rate),
-                        "sats_type": sats_type,
-                        "aftale": row.get("aftale", ""),
-                        "artnr": row.get("artnr", ""),
-                    },
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.INFO,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="beloeb",
+                        expected_value=f"{expected:.2f}",
+                        actual_value=f"{actual_amount:.2f}",
+                        message=(
+                            f"Amount differs by {diff:.2f}. "
+                            "May use staircase rates, depreciation, or other adjustments — verify manually"
+                        ),
+                        context={
+                            "qty": str(qty),
+                            "price": str(price),
+                            "rate": str(rate),
+                            "sats_type": sats_type,
+                            "aftale": row.get("aftale", ""),
+                            "artnr": row.get("artnr", ""),
+                        },
+                    )
+                )
             elif diff > settings.amount_tolerance:
-                issues.append(ValidationIssue(
-                    severity=Severity.WARNING,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=row_num,
-                    field="beloeb",
-                    expected_value=f"{expected:.2f}",
-                    actual_value=f"{actual_amount:.2f}",
-                    message=f"Minor rounding difference: {diff:.2f}",
-                    context={
-                        "qty": str(qty),
-                        "price": str(price),
-                        "rate": str(rate),
-                        "aftale": row.get("aftale", ""),
-                    },
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=row_num,
+                        field="beloeb",
+                        expected_value=f"{expected:.2f}",
+                        actual_value=f"{actual_amount:.2f}",
+                        message=f"Minor rounding difference: {diff:.2f}",
+                        context={
+                            "qty": str(qty),
+                            "price": str(price),
+                            "rate": str(rate),
+                            "aftale": row.get("aftale", ""),
+                        },
+                    )
+                )
 
         return issues

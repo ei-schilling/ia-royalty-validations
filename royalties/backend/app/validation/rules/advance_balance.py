@@ -42,19 +42,21 @@ class AdvanceBalanceRule(BaseRule):
         for aftale, offset_total in offsets.items():
             advance_total = advances.get(aftale, 0)
             if offset_total > advance_total and advance_total > 0:
-                issues.append(ValidationIssue(
-                    severity=Severity.ERROR,
-                    rule_id=self.rule_id,
-                    rule_description=self.description,
-                    row_number=None,
-                    field="advance/offset",
-                    expected_value=f"<= {advance_total:.2f}",
-                    actual_value=f"{offset_total:.2f}",
-                    message=(
-                        f"Advance offset ({offset_total:.2f}) exceeds original advance "
-                        f"({advance_total:.2f}) for agreement {aftale}"
-                    ),
-                    context={"aftale": aftale},
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=Severity.ERROR,
+                        rule_id=self.rule_id,
+                        rule_description=self.description,
+                        row_number=None,
+                        field="advance/offset",
+                        expected_value=f"<= {advance_total:.2f}",
+                        actual_value=f"{offset_total:.2f}",
+                        message=(
+                            f"Advance offset ({offset_total:.2f}) exceeds original advance "
+                            f"({advance_total:.2f}) for agreement {aftale}"
+                        ),
+                        context={"aftale": aftale},
+                    )
+                )
 
         return issues

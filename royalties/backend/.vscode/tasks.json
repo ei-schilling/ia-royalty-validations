@@ -1,0 +1,27 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Backend Tests",
+			"type": "shell",
+			"command": "C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\.venv\\Scripts\\python.exe -m pytest tests/ --tb=short --no-header -q",
+			"args": [],
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Run All Backend Tests",
+			"type": "shell",
+			"command": "C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"tests/",
+				"--tb=short",
+				"-q"
+			],
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

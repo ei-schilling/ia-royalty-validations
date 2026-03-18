@@ -1,7 +1,5 @@
 """Shared pytest fixtures for the Royalty Statement Validator test suite."""
 
-import os
-import uuid
 from pathlib import Path
 
 import pytest
@@ -9,9 +7,9 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.models.base import Base
 from app.db.database import get_db
 from app.main import app
+from app.models.base import Base
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -36,6 +34,7 @@ async def db_session():
 @pytest_asyncio.fixture
 async def client(db_session: AsyncSession):
     """Provide an HTTP test client with database dependency override."""
+
     async def override_get_db():
         yield db_session
 
@@ -46,6 +45,18 @@ async def client(db_session: AsyncSession):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def auth_client(client: AsyncClient):
+    """Provide an authenticated HTTP client (registers a test user)."""
+    resp = await client.post(
+        "/api/auth/register",
+        json={"nickname": "testuser", "password": "testpass"},
+    )
+    token = resp.json()["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
 
 
 @pytest.fixture

@@ -2,23 +2,21 @@
 
 from pathlib import Path
 
-import pytest
-
-from app.validation.base_rule import Severity, ValidationIssue
-from app.validation.parser import parse_file
+from app.validation.base_rule import Severity
 from app.validation.engine import ValidationEngine
+from app.validation.parser import parse_file
+from app.validation.rules.advance_balance import AdvanceBalanceRule
+from app.validation.rules.amount_consistency import AmountConsistencyRule
+from app.validation.rules.date_validation import DateValidationRule
+from app.validation.rules.duplicate_entries import DuplicateEntriesRule
+from app.validation.rules.guarantee_validation import GuaranteeValidationRule
+from app.validation.rules.invalid_rates import InvalidRatesRule
 
 # Import rule classes directly for isolated testing
 from app.validation.rules.missing_titles import MissingTitlesRule, _valid_isbn13
-from app.validation.rules.invalid_rates import InvalidRatesRule
-from app.validation.rules.amount_consistency import AmountConsistencyRule
-from app.validation.rules.tax_validation import TaxValidationRule
-from app.validation.rules.guarantee_validation import GuaranteeValidationRule
-from app.validation.rules.settlement_totals import SettlementTotalsRule
-from app.validation.rules.duplicate_entries import DuplicateEntriesRule
-from app.validation.rules.date_validation import DateValidationRule
-from app.validation.rules.advance_balance import AdvanceBalanceRule
 from app.validation.rules.recipient_shares import RecipientSharesRule
+from app.validation.rules.settlement_totals import SettlementTotalsRule
+from app.validation.rules.tax_validation import TaxValidationRule
 from app.validation.rules.transaction_types import TransactionTypesRule
 
 
@@ -156,15 +154,21 @@ class TestAmountConsistencyRule:
     def test_calculation_mismatch_detected(self, fixtures_dir: Path):
         data = parse_file(fixtures_dir / "calculation_errors.csv", "csv")
         issues = self.rule.validate(data)
-        # Row 1: 500 × 149.95 × 0.12 = 8997.0, but reported 9000.0 (diff=3.0 → INFO)
-        # Row 2: 200 × 99.50 × 0.10 = 1990.0, but reported 2500.0 (diff=510 → INFO)
+        # Row 1: 500 x 149.95 x 0.12 = 8997.0, but reported 9000.0 (diff=3.0 -> INFO)
+        # Row 2: 200 x 99.50 x 0.10 = 1990.0, but reported 2500.0 (diff=510 -> INFO)
         assert len(issues) >= 2
 
     def test_exact_amount_passes(self):
-        data = [{
-            "antal": "100", "stkpris": "200.00", "stkafregnsats": "10",
-            "beloeb": "2000.00", "_row_number": 2, "_source": "csv",
-        }]
+        data = [
+            {
+                "antal": "100",
+                "stkpris": "200.00",
+                "stkafregnsats": "10",
+                "beloeb": "2000.00",
+                "_row_number": 2,
+                "_source": "csv",
+            }
+        ]
         issues = self.rule.validate(data)
         assert len(issues) == 0
 
@@ -174,10 +178,16 @@ class TestAmountConsistencyRule:
         assert len(issues) == 0
 
     def test_zero_quantity_skipped(self):
-        data = [{
-            "antal": "0", "stkpris": "100", "stkafregnsats": "10",
-            "beloeb": "0", "_row_number": 2, "_source": "csv",
-        }]
+        data = [
+            {
+                "antal": "0",
+                "stkpris": "100",
+                "stkafregnsats": "10",
+                "beloeb": "0",
+                "_row_number": 2,
+                "_source": "csv",
+            }
+        ]
         issues = self.rule.validate(data)
         assert len(issues) == 0
 
@@ -241,32 +251,38 @@ class TestGuaranteeValidationRule:
         assert self.rule.rule_id == "guarantee_validation"
 
     def test_negative_garanti_passes(self):
-        data = [{
-            "_record_type": "page_summary",
-            "rest_garanti": "-5000.00",
-            "til_udbetaling": "3000.00",
-            "_row_number": 199,
-        }]
+        data = [
+            {
+                "_record_type": "page_summary",
+                "rest_garanti": "-5000.00",
+                "til_udbetaling": "3000.00",
+                "_row_number": 199,
+            }
+        ]
         issues = self.rule.validate(data)
         assert len(issues) == 0
 
     def test_positive_garanti_warning(self):
-        data = [{
-            "_record_type": "page_summary",
-            "rest_garanti": "5000.00",
-            "_row_number": 199,
-        }]
+        data = [
+            {
+                "_record_type": "page_summary",
+                "rest_garanti": "5000.00",
+                "_row_number": 199,
+            }
+        ]
         issues = self.rule.validate(data)
         warnings = [i for i in issues if i.severity == Severity.WARNING]
         assert len(warnings) == 1
 
     def test_negative_payout_error(self):
-        data = [{
-            "_record_type": "page_summary",
-            "rest_garanti": "-20000.00",
-            "til_udbetaling": "-5000.00",
-            "_row_number": 199,
-        }]
+        data = [
+            {
+                "_record_type": "page_summary",
+                "rest_garanti": "-20000.00",
+                "til_udbetaling": "-5000.00",
+                "_row_number": 199,
+            }
+        ]
         issues = self.rule.validate(data)
         errors = [i for i in issues if i.severity == Severity.ERROR]
         assert len(errors) == 1
@@ -296,33 +312,42 @@ class TestSettlementTotalsRule:
     def test_matching_totals_pass(self):
         data = [
             {
-                "_record_type": "sales_line", "_page_number": "1",
+                "_record_type": "sales_line",
+                "_page_number": "1",
                 "royalty_amount": "1000.00",
             },
             {
-                "_record_type": "sales_line", "_page_number": "1",
+                "_record_type": "sales_line",
+                "_page_number": "1",
                 "royalty_amount": "2000.00",
             },
             {
-                "_record_type": "page_summary", "_page_number": "1",
-                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
-                "fordeling_amount": "3000.00", "_row_number": 199,
+                "_record_type": "page_summary",
+                "_page_number": "1",
+                "fordeling_pct": "1.0",
+                "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00",
+                "_row_number": 199,
             },
         ]
         issues = self.rule.validate(data)
-        # fordeling_base (3000) matches sales sum (3000), pct × base = amount
+        # fordeling_base (3000) matches sales sum (3000), pct * base = amount
         assert len(issues) == 0
 
     def test_mismatched_base_error(self):
         data = [
             {
-                "_record_type": "sales_line", "_page_number": "1",
+                "_record_type": "sales_line",
+                "_page_number": "1",
                 "royalty_amount": "1000.00",
             },
             {
-                "_record_type": "page_summary", "_page_number": "1",
-                "fordeling_pct": "1.0", "fordeling_base": "5000.00",
-                "fordeling_amount": "5000.00", "_row_number": 199,
+                "_record_type": "page_summary",
+                "_page_number": "1",
+                "fordeling_pct": "1.0",
+                "fordeling_base": "5000.00",
+                "fordeling_amount": "5000.00",
+                "_row_number": 199,
             },
         ]
         issues = self.rule.validate(data)
@@ -535,10 +560,20 @@ class TestAdvanceBalanceRule:
 
     def test_balanced_advances_no_issues(self):
         data = [
-            {"transtype": "Forskud", "aftale": "AFT-001", "beloeb": "10000.00",
-             "_row_number": 2, "_source": "csv"},
-            {"transtype": "ForskudMod", "aftale": "AFT-001", "beloeb": "-8000.00",
-             "_row_number": 3, "_source": "csv"},
+            {
+                "transtype": "Forskud",
+                "aftale": "AFT-001",
+                "beloeb": "10000.00",
+                "_row_number": 2,
+                "_source": "csv",
+            },
+            {
+                "transtype": "ForskudMod",
+                "aftale": "AFT-001",
+                "beloeb": "-8000.00",
+                "_row_number": 3,
+                "_source": "csv",
+            },
         ]
         issues = self.rule.validate(data)
         assert len(issues) == 0
@@ -571,20 +606,36 @@ class TestRecipientSharesRule:
 
     def test_100_percent_passes(self):
         data = [
-            {"_record_type": "page_summary", "aftale": "AFT-001",
-             "fordeling_pct": "0.5", "_row_number": 199},
-            {"_record_type": "page_summary", "aftale": "AFT-001",
-             "fordeling_pct": "0.5", "_row_number": 299},
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "fordeling_pct": "0.5",
+                "_row_number": 199,
+            },
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "fordeling_pct": "0.5",
+                "_row_number": 299,
+            },
         ]
         issues = self.rule.validate(data)
         assert len(issues) == 0
 
     def test_over_100_percent_error(self):
         data = [
-            {"_record_type": "page_summary", "aftale": "AFT-001",
-             "fordeling_pct": "0.6", "_row_number": 199},
-            {"_record_type": "page_summary", "aftale": "AFT-001",
-             "fordeling_pct": "0.6", "_row_number": 299},
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "fordeling_pct": "0.6",
+                "_row_number": 199,
+            },
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "fordeling_pct": "0.6",
+                "_row_number": 299,
+            },
         ]
         issues = self.rule.validate(data)
         errors = [i for i in issues if i.severity == Severity.ERROR]
@@ -593,8 +644,12 @@ class TestRecipientSharesRule:
 
     def test_under_100_percent_warning(self):
         data = [
-            {"_record_type": "page_summary", "aftale": "AFT-001",
-             "fordeling_pct": "0.3", "_row_number": 199},
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "fordeling_pct": "0.3",
+                "_row_number": 199,
+            },
         ]
         issues = self.rule.validate(data)
         warnings = [i for i in issues if i.severity == Severity.WARNING]

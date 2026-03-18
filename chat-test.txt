@@ -1,0 +1,4 @@
+data: {"type": "RUN_STARTED", "runId": "run-bfdfe3516915", "timestamp": 1773824000199}
+
+data: {"type": "TEXT_MESSAGE_START", "messageId": "msg-d703955314ba", "role": "assistant", "timestamp": 1773824000199}
+

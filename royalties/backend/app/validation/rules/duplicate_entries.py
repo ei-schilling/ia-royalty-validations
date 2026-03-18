@@ -35,21 +35,23 @@ class DuplicateEntriesRule(BaseRule):
 
         for key, row_nums in seen.items():
             if len(row_nums) > 1:
-                key_dict = dict(zip(key_fields, key))
+                key_dict = dict(zip(key_fields, key, strict=False))
                 for row_num in row_nums[1:]:  # Report all but the first occurrence
-                    issues.append(ValidationIssue(
-                        severity=Severity.WARNING,
-                        rule_id=self.rule_id,
-                        rule_description=self.description,
-                        row_number=row_num,
-                        field=None,
-                        expected_value="unique row",
-                        actual_value=f"duplicate (first at row {row_nums[0]})",
-                        message=(
-                            f"Duplicate entry: same key dimensions as row {row_nums[0]} — "
-                            "may be intentional (compression) or an error"
-                        ),
-                        context=key_dict,
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            severity=Severity.WARNING,
+                            rule_id=self.rule_id,
+                            rule_description=self.description,
+                            row_number=row_num,
+                            field=None,
+                            expected_value="unique row",
+                            actual_value=f"duplicate (first at row {row_nums[0]})",
+                            message=(
+                                f"Duplicate entry: same key dimensions as row {row_nums[0]} — "
+                                "may be intentional (compression) or an error"
+                            ),
+                            context=key_dict,
+                        )
+                    )
 
         return issues
