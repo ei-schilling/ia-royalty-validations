@@ -1,10 +1,14 @@
 """File upload endpoints."""
 
+import csv
+import io
+import json
 import uuid
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -103,3 +107,164 @@ async def get_upload(
     if not upload:
         raise HTTPException(status_code=404, detail="Upload not found")
     return upload
+
+
+MAX_PREVIEW_ROWS = 200
+
+
+@router.get("/{upload_id}/content")
+async def get_upload_content(
+    upload_id: uuid.UUID, _current_user: CurrentUser, db: DbSession
+) -> JSONResponse:
+    """Return the parsed content of an uploaded file for preview purposes.
+
+    Returns JSON with ``format``, ``headers`` (for tabular), ``rows`` (list of
+    list[str]), and ``raw`` (first 500 KB of text) fields.
+    """
+    result = await db.execute(select(Upload).where(Upload.id == upload_id))
+    upload = result.scalars().first()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    file_path = Path(upload.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File no longer exists on disk")
+
+    raw_bytes = file_path.read_bytes()
+    ext = upload.file_format.lower()
+
+    headers: list[str] = []
+    rows: list[list[str]] = []
+    raw_text = ""
+
+    if ext == "csv":
+        text = raw_bytes.decode("utf-8", errors="replace")
+        raw_text = text[:500_000]
+        reader = csv.reader(io.StringIO(text))
+        for i, row in enumerate(reader):
+            if i == 0:
+                headers = row
+            else:
+                rows.append(row)
+            if i >= MAX_PREVIEW_ROWS:
+                break
+
+    elif ext == "json":
+        text = raw_bytes.decode("utf-8", errors="replace")
+        raw_text = text[:500_000]
+        try:
+            obj = json.loads(text)
+            if isinstance(obj, list) and len(obj) > 0 and isinstance(obj[0], dict):
+                headers = list(obj[0].keys())
+                for item in obj[:MAX_PREVIEW_ROWS]:
+                    rows.append([str(item.get(h, "")) for h in headers])
+            elif isinstance(obj, dict):
+                # Flat dict — display as key/value
+                headers = ["Key", "Value"]
+                for k, v in list(obj.items())[:MAX_PREVIEW_ROWS]:
+                    rows.append([str(k), str(v)])
+        except json.JSONDecodeError:
+            pass
+
+    elif ext in ("xlsx", "xls"):
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(raw_bytes), read_only=True, data_only=True)
+            ws = wb.active
+            if ws is not None:
+                for i, row in enumerate(ws.iter_rows(values_only=True)):
+                    str_row = [str(c) if c is not None else "" for c in row]
+                    if i == 0:
+                        headers = str_row
+                    else:
+                        rows.append(str_row)
+                    if i >= MAX_PREVIEW_ROWS:
+                        break
+            wb.close()
+        except Exception:
+            pass
+        # Generate text representation
+        lines = [",".join(headers)] + [",".join(r) for r in rows[:50]]
+        raw_text = "\n".join(lines)
+
+    elif ext == "pdf":
+        try:
+            import pdfplumber
+            pages: list[str] = []
+            with pdfplumber.open(io.BytesIO(raw_bytes)) as pdf:
+                for page in pdf.pages:
+                    t = page.extract_text()
+                    if t:
+                        pages.append(t)
+                    if len("\n".join(pages)) > 500_000:
+                        break
+            raw_text = "\n".join(pages)[:500_000]
+        except Exception:
+            raw_text = "(Could not extract text from PDF)"
+    else:
+        raw_text = raw_bytes.decode("utf-8", errors="replace")[:500_000]
+
+    return JSONResponse({
+        "format": ext,
+        "filename": upload.filename,
+        "headers": headers,
+        "rows": rows,
+        "raw": raw_text,
+        "total_rows": upload.row_count,
+    })
+
+
+@router.get("/{upload_id}/file")
+async def get_upload_file(
+    upload_id: uuid.UUID,
+    db: DbSession,
+    token: str | None = None,
+):
+    """Serve the raw uploaded file (used for PDF preview in iframe).
+
+    Accepts a ``?token=`` query param for iframe/embed use (iframes can't send
+    Authorization headers).
+    """
+    from fastapi.responses import Response
+    from jose import JWTError, jwt as jose_jwt
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Token query parameter required")
+
+    try:
+        payload = jose_jwt.decode(
+            token, settings.jwt_secret, algorithms=[settings.jwt_algorithm],
+        )
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    result = await db.execute(select(Upload).where(Upload.id == upload_id))
+    upload = result.scalars().first()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    file_path = Path(upload.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File no longer exists on disk")
+
+    media_types = {
+        "pdf": "application/pdf",
+        "csv": "text/csv",
+        "json": "application/json",
+        "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "xls": "application/vnd.ms-excel",
+    }
+    media_type = media_types.get(upload.file_format.lower(), "application/octet-stream")
+
+    content = file_path.read_bytes()
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": "inline",
+            "Content-Length": str(len(content)),
+        },
+    )

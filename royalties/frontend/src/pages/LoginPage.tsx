@@ -1,15 +1,15 @@
 /** Login page — cinematic auth experience. */
 
-import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { motion } from 'motion/react'
-import { BookOpenCheck, ArrowRight, Shield, Zap, BarChart3 } from 'lucide-react'
 import { login } from '@/api'
+import AuthBackground from '@/components/AuthBackground'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import AuthBackground from '@/components/AuthBackground'
+import { ArrowRight, BarChart3, BookOpenCheck, Shield, Zap } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
   const [nickname, setNickname] = useState('')
@@ -45,24 +45,24 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="hidden lg:flex flex-col justify-between w-[45%] rounded-2xl surface-elevated noise-overlay p-10 mr-8 my-4"
       >
-        <div>
-          <div className="flex items-center gap-3 mb-16">
-            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
-              <BookOpenCheck className="h-5 w-5 text-primary" />
+        <div className="flex flex-col justify-between">
+          <div className="flex gap-3 items-center mb-16">
+            <div className="flex justify-center items-center w-10 h-10 rounded-xl bg-primary/15">
+              <BookOpenCheck className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-display text-lg font-semibold text-foreground">
+            <span className="text-lg font-semibold font-display text-foreground">
               Royalty Validator
             </span>
           </div>
 
-          <h2 className="font-display text-3xl font-bold text-foreground leading-tight mb-4">
+          <h2 className="mb-4 text-3xl font-bold leading-tight font-display text-foreground">
             Every royalty,
             <br />
             every row —
             <br />
             <span className="text-gradient">verified in seconds.</span>
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
+          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
             Stop chasing discrepancies across spreadsheets. Upload your settlement files, and let
             the engine cross-check rates, territories, deductions, and totals against Schilling ERP
             — automatically. When something doesn&apos;t add up, you&apos;ll know exactly where and
@@ -82,10 +82,10 @@ export default function LoginPage() {
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 + i * 0.1, duration: 0.4 }}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-background/5 border border-border/50"
+              className="flex gap-3 items-center px-4 py-3 rounded-xl border bg-background/5 border-border/50"
             >
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <f.icon className="h-4 w-4 text-primary" />
+              <div className="flex justify-center items-center w-8 h-8 rounded-lg bg-primary/10 shrink-0">
+                <f.icon className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{f.text}</p>
@@ -101,20 +101,20 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="flex-1 flex items-center justify-center px-4"
+        className="flex flex-1 justify-center items-center px-4"
       >
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
-              <BookOpenCheck className="h-5 w-5 text-primary" />
+          <div className="flex gap-3 items-center mb-10 lg:hidden">
+            <div className="flex justify-center items-center w-10 h-10 rounded-xl bg-primary/15">
+              <BookOpenCheck className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-display text-lg font-semibold">Royalty Validator</span>
+            <span className="text-lg font-semibold font-display">Royalty Validator</span>
           </div>
 
           <div className="mb-8">
-            <h1 className="font-display text-2xl font-bold text-foreground">Welcome back</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-2xl font-bold font-display text-foreground">Welcome back</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Sign in to your account to continue.
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="nickname"
-                className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                className="text-xs font-medium tracking-wider uppercase text-muted-foreground"
               >
                 Nickname
               </Label>
@@ -134,13 +134,13 @@ export default function LoginPage() {
                 onChange={(e) => setNickname(e.target.value)}
                 maxLength={100}
                 autoFocus
-                className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+                className="h-11 border-border/50"
               />
             </div>
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                className="text-xs font-medium tracking-wider uppercase text-muted-foreground"
               >
                 Password
               </Label>
@@ -151,7 +151,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 maxLength={128}
-                className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+                className="h-11 border-border/50"
               />
             </div>
 
@@ -159,7 +159,7 @@ export default function LoginPage() {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2"
+                className="px-3 py-2 text-sm rounded-lg border text-destructive bg-destructive/10 border-destructive/20"
               >
                 {error}
               </motion.p>
@@ -167,7 +167,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 font-semibold gap-2 group"
+              className="gap-2 w-full h-11 font-semibold group"
               disabled={loading || !nickname.trim() || !password}
             >
               {loading ? (
@@ -181,11 +181,11 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
+          <p className="mt-8 text-sm text-center text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link
               to="/register"
-              className="text-primary font-semibold hover:underline underline-offset-4"
+              className="font-semibold text-primary hover:underline underline-offset-4"
             >
               Create one
             </Link>

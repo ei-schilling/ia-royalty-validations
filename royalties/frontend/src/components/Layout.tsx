@@ -23,6 +23,7 @@ export default function Layout() {
   const isUpload = location.pathname === '/upload' || location.pathname === '/'
   const isResults = location.pathname.startsWith('/results')
   const isHelp = location.pathname === '/help'
+  const isFullWidth = isResults // Results page needs full width for the document panel
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -132,7 +133,9 @@ export default function Layout() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-8">
+      <main
+        className={cn('flex-1 w-full px-6 py-8', isFullWidth ? 'max-w-full' : 'mx-auto max-w-6xl')}
+      >
         <Outlet />
       </main>
 

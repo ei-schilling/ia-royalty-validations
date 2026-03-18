@@ -82,9 +82,10 @@ export default function RegisterPage() {
               onChange={(e) => setNickname(e.target.value)}
               maxLength={100}
               autoFocus
-              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+              className="h-11 border-border/50"
             />
           </div>
+
           <div className="space-y-2">
             <Label
               htmlFor="password"
@@ -99,7 +100,7 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               maxLength={128}
-              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+              className="h-11 border-border/50"
             />
             {password.length > 0 && (
               <motion.div

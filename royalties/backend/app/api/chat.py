@@ -1,79 +1,134 @@
-"""Chat proxy — bridges TanStack AI AG-UI protocol to AnythingLLM streaming API.
+"""Chat proxy — bridges TanStack AI AG-UI protocol to LLM APIs.
 
-Strategy: uploaded files are read server-side so their text content is injected
-directly into the LLM prompt.  This avoids relying on slow AnythingLLM embedding
-and guarantees the model can "see" the document immediately.
+Architecture:
+  - RAG context: retrieved from AnythingLLM vector search
+  - LLM inference: direct calls to OpenAI (primary) or Docker Model Runner (fallback)
+  - Both LLM backends use the OpenAI-compatible /v1/chat/completions streaming API
+  - Tokens are streamed in real-time to the frontend (no buffering)
 """
 
 import base64
-import csv
 import io
 import json
+import logging
 import os
 import uuid
 import time
 from typing import AsyncGenerator
 
 import httpx
-from fastapi import APIRouter, Request, UploadFile
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+log = logging.getLogger(__name__)
 
+# ── AnythingLLM (RAG context only) ──────────────────────────────────────
 ANYTHINGLLM_BASE = "http://anythingllm:3001/api/v1"
 ANYTHINGLLM_API_KEY = "27VXB0E-8P34VRP-HZCMC8Y-M8PEJ8Y"
-MAX_INLINE_BYTES = 500_000  # ~500 KB text content inline limit
+MAX_INLINE_BYTES = 500_000
+
+# ── LLM providers (direct API calls) ───────────────────────────────────
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_BASE = "https://api.openai.com/v1"
+OPENAI_MODEL = "gpt-4o-mini"
+
+# Docker Model Runner exposes an OpenAI-compatible endpoint
+# From inside Docker network: model-runner.docker.internal
+# The backend container connects via the Docker host gateway
+DMR_BASE = os.environ.get(
+    "DMR_BASE",
+    "http://model-runner.docker.internal/engines/llama.cpp/v1",
+)
+DMR_MODEL = "docker.io/ai/qwen2.5:3B-Q4_K_M"
+
+SYSTEM_PROMPT = (
+    "You are a royalty settlement expert for Schilling ERP, a Danish publishing system. "
+    "You help users analyze royalty statements (afregninger), settlement data (afregndata), "
+    "and export files (export_schilling). The documents contain Danish financial terms: "
+    "TRANSNR (transaction number), TRANSTYPE (transaction type like Salg=Sale), KONTO (account), "
+    "AFTALE (agreement), ARTNR (article/ISBN), KANAL (channel), PRISGRUPPE (price group), "
+    "VILKAR (terms), BILAGSNR (voucher number), BILAGSDATO (voucher date), ANTAL (quantity), "
+    "STKPRIS (unit price), STKAFREGNSATS (settlement rate), BELOEB (amount), VALUTA (currency), "
+    "SKAT (tax), AFREGNBATCH (settlement batch). "
+    "Always answer based on the actual document data provided in context. "
+    "Be specific with numbers, dates, and amounts. Answer in the same language as the question."
+)
 
 _workspace_slug: str | None = None
 
 
 async def _get_workspace_slug() -> str:
-    """Get the first available workspace slug, or create one."""
     global _workspace_slug
     if _workspace_slug:
         return _workspace_slug
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{ANYTHINGLLM_BASE}/workspaces",
-            headers={"Authorization": f"Bearer {ANYTHINGLLM_API_KEY}"},
-        )
-        if resp.status_code == 200:
-            data = resp.json()
-            workspaces = data.get("workspaces", [])
-            if workspaces:
-                _workspace_slug = workspaces[0].get("slug")
-                if _workspace_slug:
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{ANYTHINGLLM_BASE}/workspaces",
+                headers={"Authorization": f"Bearer {ANYTHINGLLM_API_KEY}"},
+            )
+            if resp.status_code == 200:
+                workspaces = resp.json().get("workspaces", [])
+                if workspaces:
+                    _workspace_slug = workspaces[0].get("slug", "my-workspace")
                     return _workspace_slug
-
-        resp = await client.post(
-            f"{ANYTHINGLLM_BASE}/workspace/new",
-            headers={
-                "Authorization": f"Bearer {ANYTHINGLLM_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={"name": "Royalty Settlements"},
-        )
-        if resp.status_code == 200:
-            ws = resp.json().get("workspace", {})
-            _workspace_slug = ws.get("slug", "royalty-settlements")
-        else:
-            _workspace_slug = "royalty-settlements"
-
+    except Exception:
+        pass
+    _workspace_slug = "my-workspace"
     return _workspace_slug
+
+
+# ── RAG context retrieval ───────────────────────────────────────────────
+
+async def _get_rag_context(query: str) -> str:
+    """Retrieve relevant document chunks from AnythingLLM vector store."""
+    slug = await _get_workspace_slug()
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            # Use the non-streaming chat endpoint in "query" mode with a
+            # dummy model — we only care about the context sources returned.
+            # AnythingLLM's /workspace/:slug/chat returns sources.
+            resp = await client.post(
+                f"{ANYTHINGLLM_BASE}/workspace/{slug}/chat",
+                headers={
+                    "Authorization": f"Bearer {ANYTHINGLLM_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={"message": query, "mode": "query"},
+                timeout=30.0,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                sources = data.get("sources", [])
+                if sources:
+                    context_parts = []
+                    for src in sources[:8]:
+                        title = src.get("title", "")
+                        text = src.get("text", "")
+                        if text:
+                            context_parts.append(f"[{title}]\n{text}")
+                    if context_parts:
+                        return "\n\n---\n\n".join(context_parts)
+
+                # If model also generated text, that means AnythingLLM already
+                # sent the query to its LLM. We only want the sources.
+                # Fall through and return the textResponse if sources are empty
+                text_resp = data.get("textResponse", "")
+                if text_resp and "no relevant information" not in text_resp.lower():
+                    return f"[AnythingLLM response]\n{text_resp}"
+    except Exception as e:
+        log.warning("RAG context retrieval failed: %s", e)
+
+    return ""
 
 
 # ── file content extraction ─────────────────────────────────────────────
 
 def _extract_text(filename: str, raw: bytes) -> str:
-    """Best-effort text extraction from common file types."""
     ext = os.path.splitext(filename)[1].lower()
-
-    # Plain text formats
     if ext in {".csv", ".tsv", ".txt", ".md", ".xml"}:
         return raw.decode("utf-8", errors="replace")[:MAX_INLINE_BYTES]
-
-    # JSON
     if ext == ".json":
         try:
             obj = json.loads(raw)
@@ -81,8 +136,6 @@ def _extract_text(filename: str, raw: bytes) -> str:
         except json.JSONDecodeError:
             text = raw.decode("utf-8", errors="replace")
         return text[:MAX_INLINE_BYTES]
-
-    # Excel
     if ext in {".xlsx", ".xls"}:
         try:
             import openpyxl
@@ -98,8 +151,6 @@ def _extract_text(filename: str, raw: bytes) -> str:
             return "\n".join(rows)[:MAX_INLINE_BYTES]
         except Exception:
             return "(Could not read Excel file)"
-
-    # PDF
     if ext == ".pdf":
         try:
             import pdfplumber
@@ -114,20 +165,99 @@ def _extract_text(filename: str, raw: bytes) -> str:
             return "\n".join(pages)[:MAX_INLINE_BYTES] or "(PDF contained no extractable text)"
         except Exception:
             return "(Could not read PDF file)"
-
     return "(Binary file — content not extractable as text)"
 
 
-# ── streaming ───────────────────────────────────────────────────────────
+# ── Direct LLM streaming (OpenAI-compatible API) ───────────────────────
 
-async def _stream_sse(messages: list[dict]) -> AsyncGenerator[str, None]:
-    """Call AnythingLLM stream-chat and yield AG-UI protocol SSE chunks."""
-    slug = await _get_workspace_slug()
+async def _stream_openai_compatible(
+    base_url: str,
+    api_key: str | None,
+    model: str,
+    messages: list[dict],
+    msg_id: str,
+    timeout: float = 60.0,
+) -> AsyncGenerator[tuple[str | None, str | None], None]:
+    """Stream from any OpenAI-compatible endpoint.
+
+    Yields (delta_text, error) tuples.
+    - On success: yields (chunk_text, None) for each token
+    - On error: yields (None, error_message) once
+    """
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    payload = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+        "temperature": 0.3,
+        "max_tokens": 2048,
+    }
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=15.0, read=timeout, write=15.0, pool=15.0)
+        ) as client:
+            async with client.stream(
+                "POST",
+                f"{base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+            ) as resp:
+                if resp.status_code != 200:
+                    body = await resp.aread()
+                    try:
+                        err = json.loads(body)
+                        err_msg = err.get("error", {}).get("message", "") or str(err)
+                    except Exception:
+                        err_msg = body.decode("utf-8", errors="replace")[:200]
+                    yield (None, f"HTTP {resp.status_code}: {err_msg}")
+                    return
+
+                buffer = ""
+                async for raw in resp.aiter_text():
+                    buffer += raw
+                    while "\n" in buffer:
+                        line, buffer = buffer.split("\n", 1)
+                        line = line.strip()
+                        if not line or not line.startswith("data: "):
+                            continue
+                        data_str = line[6:]
+                        if data_str == "[DONE]":
+                            return
+                        try:
+                            data = json.loads(data_str)
+                        except json.JSONDecodeError:
+                            continue
+                        choices = data.get("choices", [])
+                        if choices:
+                            delta = choices[0].get("delta", {})
+                            text = delta.get("content", "")
+                            if text:
+                                yield (text, None)
+
+    except httpx.ConnectError:
+        yield (None, "Cannot connect to LLM service")
+    except httpx.ReadTimeout:
+        yield (None, "LLM service timed out")
+    except Exception as e:
+        yield (None, f"LLM error: {e}")
+
+
+# ── Main SSE streaming ─────────────────────────────────────────────────
+
+async def _stream_sse(messages: list[dict], mode: str = "query") -> AsyncGenerator[str, None]:
+    """Stream chat with OpenAI (primary) + Docker Model Runner (fallback).
+
+    Uses AnythingLLM only for RAG context retrieval, then calls LLMs directly.
+    """
     run_id = f"run-{uuid.uuid4().hex[:12]}"
     msg_id = f"msg-{uuid.uuid4().hex[:12]}"
     ts = int(time.time() * 1000)
 
-    # Build user message from the last user turn
+    # Extract user message from TanStack AI format
     user_message = ""
     for m in reversed(messages):
         if m.get("role") == "user":
@@ -148,65 +278,57 @@ async def _stream_sse(messages: list[dict]) -> AsyncGenerator[str, None]:
     yield f"data: {json.dumps({'type': 'RUN_STARTED', 'runId': run_id, 'timestamp': ts})}\n\n"
     yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_START', 'messageId': msg_id, 'role': 'assistant', 'timestamp': ts})}\n\n"
 
-    timeout = httpx.Timeout(connect=30.0, read=300.0, write=30.0, pool=30.0)
+    # ── Build LLM messages with RAG context ──
+    rag_context = ""
+    if mode == "query":
+        rag_context = await _get_rag_context(user_message)
+
+    llm_messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if rag_context:
+        llm_messages.append({
+            "role": "system",
+            "content": f"Relevant document context:\n\n{rag_context}",
+        })
+    llm_messages.append({"role": "user", "content": user_message})
+
+    # ── Try primary: OpenAI ──
+    primary_error: str | None = None
     got_content = False
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        try:
-            async with client.stream(
-                "POST",
-                f"{ANYTHINGLLM_BASE}/workspace/{slug}/stream-chat",
-                headers={
-                    "Authorization": f"Bearer {ANYTHINGLLM_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={"message": user_message, "mode": "query"},
-            ) as resp:
-                if resp.status_code != 200:
-                    yield f"data: {json.dumps({'type': 'RUN_ERROR', 'runId': run_id, 'timestamp': int(time.time() * 1000), 'error': {'message': f'AnythingLLM returned {resp.status_code}'}})}\n\n"
-                    return
 
-                buffer = ""
-                async for raw in resp.aiter_text():
-                    buffer += raw
-                    while "\n" in buffer:
-                        line, buffer = buffer.split("\n", 1)
-                        line = line.strip()
-                        if not line:
-                            continue
-                        if line.startswith("data: "):
-                            line = line[6:]
-                        if not line:
-                            continue
-                        try:
-                            data = json.loads(line)
-                        except json.JSONDecodeError:
-                            continue
+    async for delta, error in _stream_openai_compatible(
+        OPENAI_BASE, OPENAI_API_KEY, OPENAI_MODEL, llm_messages, msg_id, timeout=60.0
+    ):
+        if error:
+            primary_error = error
+            break
+        if delta:
+            got_content = True
+            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': delta})}\n\n"
 
-                        text = data.get("textResponse", "")
-                        is_close = data.get("close", False)
-                        is_error = data.get("error")
+    # ── Fallback: Docker Model Runner ──
+    if not got_content:
+        log.warning("Primary (OpenAI) failed: %s — trying local fallback", primary_error)
 
-                        if is_error and isinstance(is_error, str):
-                            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': f'\\n\\n⚠️ Error: {is_error}'})}\n\n"
-                            break
+        yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '\n\n---\n\n> _Using local model (OpenAI unavailable)_\n\n'})}\n\n"
 
-                        if text:
-                            got_content = True
-                            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': text})}\n\n"
+        fb_got_content = False
+        fb_error: str | None = None
 
-                        if is_close:
-                            break
+        async for delta, error in _stream_openai_compatible(
+            DMR_BASE, None, DMR_MODEL, llm_messages, msg_id, timeout=180.0
+        ):
+            if error:
+                fb_error = error
+                break
+            if delta:
+                fb_got_content = True
+                yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': delta})}\n\n"
 
-        except httpx.ConnectError:
-            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '⚠️ Cannot connect to the AI service. Please try again later.'})}\n\n"
-        except (httpx.RemoteProtocolError, httpx.ReadTimeout) as exc:
-            if not got_content:
-                yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': f'⚠️ The AI service timed out or dropped the connection. Please try again.'})}\n\n"
-        except Exception:
-            if not got_content:
-                yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '⚠️ An unexpected error occurred. Please try again.'})}\n\n"
+        if not fb_got_content:
+            err_text = f"⚠️ Both AI providers failed.\n- **OpenAI**: {primary_error}\n- **Local model**: {fb_error}"
+            yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': err_text})}\n\n"
 
-    # Always close the message and run so the frontend exits loading state
+    # Close message and run
     end_ts = int(time.time() * 1000)
     yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_END', 'messageId': msg_id, 'timestamp': end_ts})}\n\n"
     yield f"data: {json.dumps({'type': 'RUN_FINISHED', 'runId': run_id, 'timestamp': end_ts, 'finishReason': 'stop'})}\n\n"
@@ -214,12 +336,19 @@ async def _stream_sse(messages: list[dict]) -> AsyncGenerator[str, None]:
 
 @router.post("/stream")
 async def chat_stream(request: Request) -> StreamingResponse:
-    """TanStack AI AG-UI compatible chat endpoint proxying to AnythingLLM."""
+    """TanStack AI AG-UI compatible chat endpoint.
+
+    Accepts optional ``mode``: "query" (default, RAG), "chat", or "agent".
+    Mode can be passed as a query param (?mode=agent) or in the JSON body.
+    """
     body = await request.json()
     messages = body.get("messages", [])
+    mode = request.query_params.get("mode") or body.get("mode", "query")
+    if mode not in ("query", "chat", "agent"):
+        mode = "query"
 
     return StreamingResponse(
-        _stream_sse(messages),
+        _stream_sse(messages, mode=mode),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -234,7 +363,6 @@ async def chat_stream(request: Request) -> StreamingResponse:
 ALLOWED_EXTENSIONS = {
     ".csv", ".xlsx", ".xls", ".json", ".pdf", ".txt",
     ".doc", ".docx", ".md", ".tsv", ".xml",
-    # Images (for future vision model support)
     ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg",
 }
 
@@ -243,9 +371,8 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"}
 
 @router.post("/upload")
 async def chat_upload(request: Request):
-    """Upload a file: extract its text content and return it so the frontend
-    can inject it directly into the chat message.  Also upload+embed into
-    AnythingLLM asynchronously for future RAG retrieval."""
+    """Upload a file: extract text and return it for inline chat injection.
+    Also uploads to AnythingLLM for future RAG retrieval."""
     form = await request.form()
     file = form.get("file")
     if file is None:
@@ -258,7 +385,6 @@ async def chat_upload(request: Request):
     content = await file.read()
     is_image = ext in IMAGE_EXTENSIONS
 
-    # For images: return base64 preview (for future vision model use)
     if is_image:
         b64 = base64.b64encode(content).decode("ascii")
         mime = file.content_type or "image/png"
@@ -274,10 +400,9 @@ async def chat_upload(request: Request):
             },
         }
 
-    # For documents: extract text content
     extracted_text = _extract_text(file.filename, content)
 
-    # Also upload to AnythingLLM in the background (best-effort, non-blocking)
+    # Best-effort embed into AnythingLLM
     slug = await _get_workspace_slug()
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -300,9 +425,8 @@ async def chat_upload(request: Request):
                         json={"adds": doc_locations},
                     )
     except Exception:
-        pass  # embedding is best-effort; the text content is the primary mechanism
+        pass
 
-    # Truncate preview for response (keep full text for contentFull)
     preview = extracted_text[:500]
     if len(extracted_text) > 500:
         preview += "…"

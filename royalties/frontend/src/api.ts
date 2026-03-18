@@ -4,6 +4,7 @@ import type {
   TokenResponse,
   UserResponse,
   UploadResponse,
+  UploadContentResponse,
   UploadHistoryItem,
   ValidationRunStarted,
   ValidationRunResponse,
@@ -69,6 +70,11 @@ export function listUploads() {
 /** Get upload details by ID. */
 export function getUpload(uploadId: string) {
   return request<UploadResponse>(`/uploads/${uploadId}`)
+}
+
+/** Get parsed content of an uploaded file for preview. */
+export function getUploadContent(uploadId: string) {
+  return request<UploadContentResponse>(`/uploads/${uploadId}/content`)
 }
 
 /** Trigger a validation run. */

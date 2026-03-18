@@ -1,6 +1,14 @@
 /** Help page — premium AI chat assistant with markdown + file upload. */
 
-import { useState, useRef, useEffect, useCallback, type FormEvent, type DragEvent } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  type FormEvent,
+  type DragEvent,
+} from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   Send,
@@ -20,6 +28,8 @@ import {
   Copy,
   Check,
   ArrowDown,
+  Database,
+  Search,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -231,9 +241,15 @@ export default function HelpPage() {
   >([])
   const [isDragging, setIsDragging] = useState(false)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
+  const [chatMode, setChatMode] = useState<'query' | 'agent'>('query')
+
+  const connection = useMemo(
+    () => fetchServerSentEvents(`/api/chat/stream?mode=${chatMode}`),
+    [chatMode],
+  )
 
   const { messages, sendMessage, isLoading, stop, clear } = useChat({
-    connection: fetchServerSentEvents('/api/chat/stream'),
+    connection,
   })
 
   // Auto-scroll
@@ -748,6 +764,36 @@ export default function HelpPage() {
 
               {/* Action buttons */}
               <div className="flex items-center gap-1 pr-2 pb-2.5">
+                {/* Mode toggle: RAG ↔ Agent (SQL) */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => setChatMode((m) => (m === 'query' ? 'agent' : 'query'))}
+                      className={cn(
+                        'p-1.5 rounded-lg transition-all flex items-center gap-1',
+                        chatMode === 'agent'
+                          ? 'text-primary bg-primary/10 ring-1 ring-primary/30'
+                          : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/50',
+                      )}
+                    >
+                      {chatMode === 'agent' ? (
+                        <Database className="h-3.5 w-3.5" />
+                      ) : (
+                        <Search className="h-3.5 w-3.5" />
+                      )}
+                      <span className="text-[10px] font-medium uppercase tracking-wider pr-0.5">
+                        {chatMode === 'agent' ? 'SQL' : 'RAG'}
+                      </span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {chatMode === 'agent'
+                      ? 'Agent mode: can query the database'
+                      : 'RAG mode: searches documents'}
+                  </TooltipContent>
+                </Tooltip>
+
                 {hasMessages && !isLoading && (
                   <Tooltip>
                     <TooltipTrigger asChild>

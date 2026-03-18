@@ -21,6 +21,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://validator:validator@db:5432/validator
       UPLOAD_DIR: /app/uploads
       CORS_ORIGINS: '["http://localhost:5173","http://localhost"]'
+      DMR_BASE: http://model-runner.docker.internal/engines/llama.cpp/v1
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
@@ -35,6 +37,23 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+      - ./pgadmin-pgpass:/pgadmin4/pgpass:ro
 
   anythingllm:
     image: mintplexlabs/anythingllm:latest
@@ -61,3 +80,4 @@ volumes:
   pgdata:
   uploads:
   anythingllm_storage:
+  pgadmin_data:

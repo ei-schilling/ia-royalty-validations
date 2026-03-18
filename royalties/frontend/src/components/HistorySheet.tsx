@@ -130,7 +130,7 @@ export default function HistorySheet({ open, onOpenChange }: Props) {
             <p className="text-xs text-muted-foreground/70">Validated files will appear here</p>
           </div>
         ) : (
-          <ScrollArea className="flex-1 -mx-4 -mb-4 mt-2">
+          <ScrollArea className="flex-1 min-h-0 -mx-4 -mb-4 mt-2">
             <div className="space-y-2 px-4 pb-4">
               <AnimatePresence initial={false}>
                 {uploads.map((upload, i) => (

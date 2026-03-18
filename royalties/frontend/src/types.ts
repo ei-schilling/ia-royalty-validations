@@ -21,6 +21,15 @@ export interface UploadResponse {
   uploaded_at: string
 }
 
+export interface UploadContentResponse {
+  format: string
+  filename: string
+  headers: string[]
+  rows: string[][]
+  raw: string
+  total_rows: number | null
+}
+
 export interface ValidationIssueSummary {
   id: string
   severity: 'error' | 'warning' | 'info'

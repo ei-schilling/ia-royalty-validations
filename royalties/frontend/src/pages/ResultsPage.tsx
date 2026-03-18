@@ -1,6 +1,6 @@
 /** Validation results — rich dashboard with animated metrics. */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import {
@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   Upload,
   Shield,
-  ArrowRight,
+  ChevronDown,
   ChevronRight,
   Rows3,
   Hash,
@@ -19,13 +19,26 @@ import {
   CircleCheck,
   FileDown,
   FileSearch,
+  PanelRightOpen,
+  PanelRightClose,
+  FileText,
+  MessageSquare,
 } from 'lucide-react'
 import { getValidation, downloadValidationPdf, downloadAnnotatedPdf } from '@/api'
 import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
+import DocumentPreview from '@/components/DocumentPreview'
+import DocumentChat from '@/components/DocumentChat'
 
 /** Convert snake_case rule IDs to readable Title Case */
 function formatRuleId(id: string) {
@@ -133,6 +146,16 @@ export default function ResultsPage() {
     info: false,
     passed: false,
   })
+  // Right panel state
+  const [panelOpen, setPanelOpen] = useState(true)
+  const [panelTab, setPanelTab] = useState<'preview' | 'chat'>('preview')
+  const [docContent, setDocContent] = useState('')
+  const [docFilename, setDocFilename] = useState('')
+
+  const handleContentLoaded = useCallback((content: string, filename: string) => {
+    setDocContent(content)
+    setDocFilename(filename)
+  }, [])
 
   const toggleSection = (key: string) => setOpenSections((s) => ({ ...s, [key]: !s[key] }))
 
@@ -187,290 +210,393 @@ export default function ResultsPage() {
   const passedRules = ALL_RULES.filter((r) => !errorRuleIds.has(r.rule_id))
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-8"
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2.5">
-            <Shield className="h-6 w-6 text-primary" />
-            Validation Results
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Your file was checked against {summary.rules_executed} validation rules across{' '}
-            {summary.total_rows} rows.
-          </p>
-          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 font-mono">
-              <Hash className="h-3 w-3" />
-              {summary.rules_executed} rules
-            </span>
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 font-mono">
-              <Rows3 className="h-3 w-3" />
-              {summary.total_rows} rows
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 group"
-            disabled={downloading}
-            onClick={async () => {
-              if (!validationId) return
-              setDownloading(true)
-              try {
-                await downloadValidationPdf(validationId)
-              } catch {
-                // silently fail — user can retry
-              } finally {
-                setDownloading(false)
-              }
-            }}
-          >
-            <FileDown className={cn('h-3.5 w-3.5', downloading && 'animate-bounce')} />
-            {downloading ? 'Generating…' : 'Export Validation'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 group"
-            disabled={downloadingAnnotated}
-            onClick={async () => {
-              if (!validationId) return
-              setDownloadingAnnotated(true)
-              try {
-                await downloadAnnotatedPdf(validationId)
-              } catch {
-                // silently fail — user can retry
-              } finally {
-                setDownloadingAnnotated(false)
-              }
-            }}
-          >
-            <FileSearch className={cn('h-3.5 w-3.5', downloadingAnnotated && 'animate-bounce')} />
-            {downloadingAnnotated ? 'Generating…' : 'Export Annotated'}
-          </Button>
-          <Link to="/upload">
-            <Button variant="outline" size="sm" className="gap-1.5 group">
-              <Upload className="h-3.5 w-3.5" />
-              New Upload
-              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats strip */}
-      <div className="grid grid-cols-5 gap-3">
-        {/* Pass rate */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className={cn(
-            'rounded-xl border p-4 flex flex-col items-center justify-center gap-2',
-            hasIssues ? 'border-border/50 bg-card' : 'border-emerald-500/20 bg-emerald-500/5',
-          )}
-        >
-          <div className="relative w-16 h-16">
-            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="8"
-                className="text-border/30"
-              />
-              <motion.circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                strokeWidth="8"
-                strokeLinecap="round"
-                className={hasIssues ? 'text-primary' : 'text-emerald-400'}
-                strokeDasharray={`${2 * Math.PI * 42}`}
-                initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
-                animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - passRate / 100) }}
-                transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-display text-lg font-bold text-foreground leading-none">
-                {passRate}%
+    <div className="flex gap-0 h-[calc(100vh-8rem)] -my-2">
+      {/* ── Left: Validation Results (40%) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className={cn(
+          'space-y-8 overflow-y-auto pr-4 transition-all duration-300',
+          panelOpen ? 'w-[40%] shrink-0 min-w-0' : 'flex-1',
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2.5">
+              <Shield className="h-6 w-6 text-primary" />
+              Validation Results
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Your file was checked against {summary.rules_executed} validation rules across{' '}
+              {summary.total_rows} rows.
+            </p>
+            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 font-mono">
+                <Hash className="h-3 w-3" />
+                {summary.rules_executed} rules
+              </span>
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 font-mono">
+                <Rows3 className="h-3 w-3" />
+                {summary.total_rows} rows
               </span>
             </div>
           </div>
-          <p
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={downloading || downloadingAnnotated}
+              >
+                {downloading || downloadingAnnotated ? (
+                  <Spinner className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+                {downloading ? 'Generating…' : downloadingAnnotated ? 'Generating…' : 'Actions'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={async () => {
+                  if (!validationId) return
+                  setDownloading(true)
+                  try {
+                    await downloadValidationPdf(validationId)
+                  } catch {
+                    // silently fail — user can retry
+                  } finally {
+                    setDownloading(false)
+                  }
+                }}
+              >
+                <FileDown className="h-4 w-4" />
+                Export Validation PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  if (!validationId) return
+                  setDownloadingAnnotated(true)
+                  try {
+                    await downloadAnnotatedPdf(validationId)
+                  } catch {
+                    // silently fail — user can retry
+                  } finally {
+                    setDownloadingAnnotated(false)
+                  }
+                }}
+              >
+                <FileSearch className="h-4 w-4" />
+                Export Annotated PDF
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/upload">
+                  <Upload className="h-4 w-4" />
+                  New Upload
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Stats strip */}
+        <div className="grid grid-cols-5 gap-3">
+          {/* Pass rate */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
             className={cn(
-              'text-[10px] font-medium text-center leading-tight',
-              hasIssues ? 'text-muted-foreground' : 'text-emerald-400',
+              'rounded-xl border p-4 flex flex-col items-center justify-center gap-2',
+              hasIssues ? 'border-border/50 bg-card' : 'border-emerald-500/20 bg-emerald-500/5',
             )}
           >
-            {summary.passed_checks}/{summary.rules_executed} passed
-          </p>
-        </motion.div>
-
-        {/* Metric cards */}
-        <MetricCard
-          label="Passed"
-          value={summary.passed_checks}
-          subtitle="No errors"
-          icon={CheckCircle2}
-          color="text-emerald-400"
-          bg="bg-emerald-500/10"
-          onClick={() => toggleSection('passed')}
-          active={openSections.passed}
-          delay={0.15}
-        />
-        <MetricCard
-          label="Errors"
-          value={summary.errors}
-          subtitle="Critical"
-          icon={AlertCircle}
-          color="text-red-400"
-          bg="bg-red-500/10"
-          onClick={() => toggleSection('error')}
-          active={openSections.error}
-          delay={0.2}
-        />
-        <MetricCard
-          label="Warnings"
-          value={summary.warnings}
-          subtitle="Review needed"
-          icon={AlertTriangle}
-          color="text-amber-400"
-          bg="bg-amber-500/10"
-          onClick={() => toggleSection('warning')}
-          active={openSections.warning}
-          delay={0.25}
-        />
-        <MetricCard
-          label="Info"
-          value={summary.infos}
-          subtitle="Observations"
-          icon={Info}
-          color="text-sky-400"
-          bg="bg-sky-500/10"
-          onClick={() => toggleSection('info')}
-          active={openSections.info}
-          delay={0.3}
-        />
-      </div>
-
-      {/* ── Collapsible sections ─────────────────────── */}
-
-      {/* Errors */}
-      {errorIssues.length > 0 && (
-        <IssueSection
-          severity="error"
-          issues={errorIssues}
-          open={openSections.error}
-          onToggle={() => toggleSection('error')}
-        />
-      )}
-
-      {/* Warnings */}
-      {warningIssues.length > 0 && (
-        <IssueSection
-          severity="warning"
-          issues={warningIssues}
-          open={openSections.warning}
-          onToggle={() => toggleSection('warning')}
-        />
-      )}
-
-      {/* Info */}
-      <IssueSection
-        severity="info"
-        issues={infoIssues}
-        open={openSections.info}
-        onToggle={() => toggleSection('info')}
-      />
-
-      {/* Passed Rules */}
-      <div>
-        <button
-          onClick={() => toggleSection('passed')}
-          className="flex items-center gap-2 mb-3 cursor-pointer w-full text-left"
-        >
-          <ChevronRight
-            className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform duration-200',
-              openSections.passed && 'rotate-90',
-            )}
-          />
-          <CircleCheck className="h-4 w-4 text-emerald-400" />
-          <h2 className="text-sm font-semibold text-foreground">Passed Rules</h2>
-          <Badge
-            variant="secondary"
-            className="font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-          >
-            {passedRules.length}
-          </Badge>
-          <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">
-            — Rules that found no critical issues
-          </span>
-        </button>
-
-        <AnimatePresence>
-          {openSections.passed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden"
-            >
-              <div className="space-y-1.5">
-                {passedRules.map((rule, i) => (
-                  <motion.div
-                    key={rule.rule_id}
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.2 }}
-                    className="flex items-start gap-3 px-4 py-3 rounded-lg border border-emerald-500/10 bg-emerald-500/[0.03]"
-                  >
-                    <CircleCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground font-medium">{rule.description}</p>
-                      <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                        {formatRuleId(rule.rule_id)}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+            <div className="relative w-16 h-16">
+              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  className="text-border/30"
+                />
+                <motion.circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  className={hasIssues ? 'text-primary' : 'text-emerald-400'}
+                  strokeDasharray={`${2 * Math.PI * 42}`}
+                  initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                  animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - passRate / 100) }}
+                  transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-display text-lg font-bold text-foreground leading-none">
+                  {passRate}%
+                </span>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            </div>
+            <p
+              className={cn(
+                'text-[10px] font-medium text-center leading-tight',
+                hasIssues ? 'text-muted-foreground' : 'text-emerald-400',
+              )}
+            >
+              {summary.passed_checks}/{summary.rules_executed} passed
+            </p>
+          </motion.div>
 
-      {/* No issues at all */}
-      {!hasIssues && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 py-10 flex flex-col items-center gap-3"
+          {/* Metric cards */}
+          <MetricCard
+            label="Passed"
+            value={summary.passed_checks}
+            subtitle="No errors"
+            icon={CheckCircle2}
+            color="text-emerald-400"
+            bg="bg-emerald-500/10"
+            onClick={() => toggleSection('passed')}
+            active={openSections.passed}
+            delay={0.15}
+          />
+          <MetricCard
+            label="Errors"
+            value={summary.errors}
+            subtitle="Critical"
+            icon={AlertCircle}
+            color="text-red-400"
+            bg="bg-red-500/10"
+            onClick={() => toggleSection('error')}
+            active={openSections.error}
+            delay={0.2}
+          />
+          <MetricCard
+            label="Warnings"
+            value={summary.warnings}
+            subtitle="Review needed"
+            icon={AlertTriangle}
+            color="text-amber-400"
+            bg="bg-amber-500/10"
+            onClick={() => toggleSection('warning')}
+            active={openSections.warning}
+            delay={0.25}
+          />
+          <MetricCard
+            label="Info"
+            value={summary.infos}
+            subtitle="Observations"
+            icon={Info}
+            color="text-sky-400"
+            bg="bg-sky-500/10"
+            onClick={() => toggleSection('info')}
+            active={openSections.info}
+            delay={0.3}
+          />
+        </div>
+
+        {/* ── Collapsible sections ─────────────────────── */}
+
+        {/* Errors */}
+        {errorIssues.length > 0 && (
+          <IssueSection
+            severity="error"
+            issues={errorIssues}
+            open={openSections.error}
+            onToggle={() => toggleSection('error')}
+          />
+        )}
+
+        {/* Warnings */}
+        {warningIssues.length > 0 && (
+          <IssueSection
+            severity="warning"
+            issues={warningIssues}
+            open={openSections.warning}
+            onToggle={() => toggleSection('warning')}
+          />
+        )}
+
+        {/* Info */}
+        <IssueSection
+          severity="info"
+          issues={infoIssues}
+          open={openSections.info}
+          onToggle={() => toggleSection('info')}
+        />
+
+        {/* Passed Rules */}
+        <div>
+          <button
+            onClick={() => toggleSection('passed')}
+            className="flex items-center gap-2 mb-3 cursor-pointer w-full text-left"
+          >
+            <ChevronRight
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform duration-200',
+                openSections.passed && 'rotate-90',
+              )}
+            />
+            <CircleCheck className="h-4 w-4 text-emerald-400" />
+            <h2 className="text-sm font-semibold text-foreground">Passed Rules</h2>
+            <Badge
+              variant="secondary"
+              className="font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+            >
+              {passedRules.length}
+            </Badge>
+            <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">
+              — Rules that found no critical issues
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {openSections.passed && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-1.5">
+                  {passedRules.map((rule, i) => (
+                    <motion.div
+                      key={rule.rule_id}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.03, duration: 0.2 }}
+                      className="flex items-start gap-3 px-4 py-3 rounded-lg border border-emerald-500/10 bg-emerald-500/[0.03]"
+                    >
+                      <CircleCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground font-medium">{rule.description}</p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                          {formatRuleId(rule.rule_id)}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* No issues at all */}
+        {!hasIssues && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 py-10 flex flex-col items-center gap-3"
+          >
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+            </div>
+            <p className="text-sm font-semibold text-emerald-400">All checks passed!</p>
+            <p className="text-xs text-muted-foreground max-w-xs text-center">
+              No errors, warnings, or informational notices were found. Your file is clean.
+            </p>
+          </motion.div>
+        )}
+      </motion.div>
+
+      {/* ── Right Panel: Document Preview + Chat ── */}
+      <AnimatePresence>
+        {panelOpen && data && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 border-l border-border/50 flex flex-col h-full overflow-hidden bg-card/30"
+          >
+            {/* Panel tabs */}
+            <div className="flex items-center border-b border-border/50 shrink-0">
+              <button
+                onClick={() => setPanelTab('preview')}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2',
+                  panelTab === 'preview'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                Preview
+              </button>
+              <button
+                onClick={() => setPanelTab('chat')}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2',
+                  panelTab === 'chat'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                AI Chat
+              </button>
+              <div className="flex-1" />
+              <button
+                onClick={() => setPanelOpen(false)}
+                className="p-2 mr-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Close panel"
+              >
+                <PanelRightClose className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Panel content — both tabs stay mounted to preserve chat state */}
+            <div className="flex-1 min-h-0 relative">
+              <div
+                className={cn(
+                  'absolute inset-0',
+                  panelTab !== 'preview' && 'invisible pointer-events-none',
+                )}
+              >
+                <DocumentPreview uploadId={data.upload_id} onContentLoaded={handleContentLoaded} />
+              </div>
+              <div
+                className={cn(
+                  'absolute inset-0',
+                  panelTab !== 'chat' && 'invisible pointer-events-none',
+                )}
+              >
+                {docContent ? (
+                  <DocumentChat documentContent={docContent} filename={docFilename} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground p-4 text-center">
+                    Switch to Preview tab first to load the document content.
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Panel toggle button (when closed) */}
+      {!panelOpen && data && (
+        <motion.button
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => setPanelOpen(true)}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex items-center gap-1.5 px-2 py-3 rounded-lg border border-border/50 bg-card shadow-lg text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+          title="Open document panel"
         >
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-            <CheckCircle2 className="h-6 w-6 text-emerald-400" />
-          </div>
-          <p className="text-sm font-semibold text-emerald-400">All checks passed!</p>
-          <p className="text-xs text-muted-foreground max-w-xs text-center">
-            No errors, warnings, or informational notices were found. Your file is clean.
-          </p>
-        </motion.div>
+          <PanelRightOpen className="h-4 w-4" />
+        </motion.button>
       )}
-    </motion.div>
+    </div>
   )
 }
 

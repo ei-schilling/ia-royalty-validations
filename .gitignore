@@ -25,3 +25,11 @@ royalties/backend/uploads/
 # Screenshots / local test artifacts
 .playwright-mcp/
 *.env
+
+# Windows NUL device artifacts
+nul
+
+# Test/debug scripts
+test_*.py
+ws_check.json
+skills-lock.json

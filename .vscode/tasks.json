@@ -150,6 +150,131 @@
 			"label": "Test Chat Stream",
 			"type": "shell",
 			"command": "curl -s -X POST http://localhost:8000/api/chat/stream -H \"Content-Type: application/json\" -d \"{\\\"messages\\\":[{\\\"role\\\":\\\"user\\\",\\\"parts\\\":[{\\\"type\\\":\\\"text\\\",\\\"content\\\":\\\"Say hello in markdown with a bullet list\\\"}]}]}\" 2>&1 | Select-Object -First 15"
+		},
+		{
+			"label": "Rebuild Backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d backend 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Check chat.py",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Content C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\backend\\app\\api\\chat.py -Head 5"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Force rebuild backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose build --no-cache backend 2>&1; docker compose up -d backend 2>&1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Test DMR & Build Backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Write-Output '=== Testing Docker Model Runner ==='; docker exec royalties-backend-1 python -c \"import httpx; r=httpx.get('http://model-runner.docker.internal/engines/llama.cpp/v1/models', timeout=5); print('STATUS:', r.status_code); print('BODY:', r.text[:300])\" 2>&1; Write-Output '=== Done ==='"
+			]
+		},
+		{
+			"label": "Test DMR Inside Container",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"docker cp C:\\Users\\ei\\Projects\\royaltyStatementValidator\\test_dmr_inside.py royalties-backend-1:/tmp/test_dmr.py; docker exec royalties-backend-1 python /tmp/test_dmr.py 2>&1"
+			]
+		},
+		{
+			"label": "Rebuild Backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d backend 2>&1; Write-Output '=== DONE ==='"
+			]
+		},
+		{
+			"label": "Test Stream",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"python C:\\Users\\ei\\Projects\\royaltyStatementValidator\\test_stream.py 2>&1"
+			]
+		},
+		{
+			"label": "Rebuild Backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d backend 2>&1 | Select-Object -Last 20; Write-Output '---DONE---'"
+			]
+		},
+		{
+			"label": "Docker Full Rebuild",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose build --no-cache frontend 2>&1; Write-Host 'FRONTEND_BUILD_DONE'; docker compose up -d 2>&1; Write-Host 'ALL_UP'; docker compose ps 2>&1"
+			]
+		},
+		{
+			"label": "Git Commit and Push",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git add -A 2>&1; git commit -m 'feat: PDF iframe preview, chat persistence, actions dropdown, scroll fix, chat format cleanup' 2>&1; git push origin main 2>&1; Write-Host 'GIT_TASK_COMPLETE'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Git Status Check",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git log --oneline -5 2>&1; Write-Host '---'; git status --porcelain 2>&1 | Select-Object -First 10; Write-Host '---STATUS_DONE---'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Git: Stage Amend Push",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git add -A 2>&1; Write-Host '=== FILES STAGED ==='; git status --short 2>&1; Write-Host '=== AMENDING COMMIT ==='; git commit --amend -m 'feat: PDF iframe preview, chat persistence, actions dropdown, scroll fix, chat format cleanup' 2>&1; Write-Host '=== PUSHING ==='; git push origin main 2>&1; Write-Host '=== ALL DONE ==='\""
+		},
+		{
+			"label": "Git: Check State",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git log --oneline -3 2>&1; Write-Host '---'; git status --short 2>&1; Write-Host '---'; git remote show origin 2>&1 | Select-String -Pattern 'main'; Write-Host '=== CHECK DONE ==='\""
 		}
 	]
 }
