@@ -1,0 +1,7 @@
+backend-1  | INFO:     Started server process [1]
+backend-1  | INFO:     Waiting for application startup.
+backend-1  | INFO:     Application startup complete.
+backend-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+backend-1  | INFO:     172.18.0.1:33630 - "GET /health HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.1:42222 - "POST /api/chat/stream HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.1:54374 - "POST /api/chat/stream HTTP/1.1" 200 OK

@@ -4,10 +4,12 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.api.auth import CurrentUser
 from app.db.database import get_db
 from app.models.upload import Upload
 from app.models.validation_result import ValidationIssue, ValidationRun
@@ -19,6 +21,8 @@ from app.schemas.validation import (
     ValidationSummary,
 )
 from app.services.validation_service import run_validation
+from app.services.pdf_service import generate_validation_pdf
+from app.services.annotated_pdf_service import generate_annotated_pdf
 
 router = APIRouter(prefix="/api/validations", tags=["validations"])
 
@@ -28,6 +32,7 @@ DbSession = Annotated[AsyncSession, Depends(get_db)]
 @router.post("/{upload_id}/run", response_model=ValidationRunStarted, status_code=201)
 async def trigger_validation(
     upload_id: uuid.UUID,
+    _current_user: CurrentUser,
     db: DbSession,
     body: ValidationRunRequest | None = None,
 ) -> dict:
@@ -43,7 +48,9 @@ async def trigger_validation(
 
 
 @router.get("/{validation_id}", response_model=ValidationRunResponse)
-async def get_validation(validation_id: uuid.UUID, db: DbSession) -> dict:
+async def get_validation(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession
+) -> dict:
     """Get full validation results including all issues."""
     result = await db.execute(
         select(ValidationRun)
@@ -79,6 +86,7 @@ async def get_validation(validation_id: uuid.UUID, db: DbSession) -> dict:
 @router.get("/{validation_id}/issues", response_model=list[ValidationIssueSummary])
 async def get_validation_issues(
     validation_id: uuid.UUID,
+    _current_user: CurrentUser,
     db: DbSession,
     severity: Annotated[str | None, Query()] = None,
     page: Annotated[int, Query(ge=1)] = 1,
@@ -97,3 +105,105 @@ async def get_validation_issues(
 
     result = await db.execute(query)
     return list(result.scalars().all())
+
+
+@router.get("/{validation_id}/pdf")
+async def download_validation_pdf(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession,
+) -> Response:
+    """Generate and return a PDF report for a validation run."""
+    result = await db.execute(
+        select(ValidationRun)
+        .where(ValidationRun.id == validation_id)
+        .options(selectinload(ValidationRun.issues), selectinload(ValidationRun.upload))
+    )
+    run = result.scalars().first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Validation run not found")
+
+    filename = run.upload.filename if run.upload else "unknown"
+    total_rows = run.upload.row_count or 0 if run.upload else 0
+
+    issues_dicts = [
+        {
+            "severity": issue.severity,
+            "rule_id": issue.rule_id,
+            "rule_description": issue.rule_description,
+            "row_number": issue.row_number,
+            "field": issue.field,
+            "expected_value": issue.expected_value,
+            "actual_value": issue.actual_value,
+            "message": issue.message,
+        }
+        for issue in run.issues
+    ]
+
+    pdf_bytes = generate_validation_pdf(
+        filename=filename,
+        validation_id=str(validation_id),
+        started_at=run.started_at,
+        completed_at=run.completed_at,
+        total_rows=total_rows,
+        rules_executed=run.rules_executed,
+        passed_checks=run.passed_count,
+        errors=run.error_count,
+        warnings=run.warning_count,
+        infos=run.info_count,
+        issues=issues_dicts,
+    )
+
+    safe_name = filename.rsplit(".", 1)[0] if "." in filename else filename
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}_report.pdf"'},
+    )
+
+
+@router.get("/{validation_id}/annotated-pdf")
+async def download_annotated_pdf(
+    validation_id: uuid.UUID, _current_user: CurrentUser, db: DbSession,
+) -> Response:
+    """Generate a PDF of the original data with validation issues highlighted."""
+    result = await db.execute(
+        select(ValidationRun)
+        .where(ValidationRun.id == validation_id)
+        .options(selectinload(ValidationRun.issues), selectinload(ValidationRun.upload))
+    )
+    run = result.scalars().first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Validation run not found")
+
+    upload = run.upload
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    issues_dicts = [
+        {
+            "severity": issue.severity,
+            "rule_id": issue.rule_id,
+            "rule_description": issue.rule_description,
+            "row_number": issue.row_number,
+            "field": issue.field,
+            "expected_value": issue.expected_value,
+            "actual_value": issue.actual_value,
+            "message": issue.message,
+        }
+        for issue in run.issues
+    ]
+
+    pdf_bytes = generate_annotated_pdf(
+        file_path=upload.file_path,
+        file_format=upload.file_format,
+        filename=upload.filename,
+        validation_id=str(validation_id),
+        total_rows=upload.row_count or 0,
+        issues=issues_dicts,
+    )
+
+    safe_name = upload.filename.rsplit(".", 1)[0] if "." in upload.filename else upload.filename
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}_annotated.pdf"'},
+    )

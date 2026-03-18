@@ -1,0 +1,20 @@
+backend-1  |   File "/usr/local/lib/python3.12/site-packages/httpx/_models.py", line 997, in aiter_bytes
+backend-1  |     async for raw_bytes in self.aiter_raw():
+backend-1  |   File "/usr/local/lib/python3.12/site-packages/httpx/_models.py", line 1055, in aiter_raw
+backend-1  |     async for raw_stream_bytes in self.stream:
+backend-1  |   File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 176, in __aiter__
+backend-1  |     async for chunk in self._stream:
+backend-1  |   File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 270, in __aiter__
+backend-1  |     with map_httpcore_exceptions():
+backend-1  |          ^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(value)
+backend-1  |   File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+backend-1  |     raise mapped_exc(message) from exc
+backend-1  | httpx.RemoteProtocolError: peer closed connection without sending complete message body (incomplete chunked read)
+backend-1  | INFO:     172.18.0.5:48912 - "POST /api/chat/stream HTTP/1.0" 200 OK
+backend-1  | INFO:     172.18.0.1:49870 - "POST /api/chat/stream HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:52068 - "POST /api/chat/upload HTTP/1.0" 200 OK
+backend-1  | INFO:     172.18.0.5:52080 - "POST /api/chat/stream HTTP/1.0" 200 OK
+backend-1  | INFO:     172.18.0.1:39282 - "POST /api/chat/stream HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.1:33126 - "POST /api/chat/stream HTTP/1.1" 200 OK

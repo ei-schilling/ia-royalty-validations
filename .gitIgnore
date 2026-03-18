@@ -1,1 +1,5 @@
 schilling/*
+
+# Environment files with secrets
+royalties/anythingllm.env
+*.env

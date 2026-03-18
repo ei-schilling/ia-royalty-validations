@@ -6,6 +6,12 @@ export interface UserResponse {
   created_at: string
 }
 
+export interface TokenResponse {
+  access_token: string
+  token_type: string
+  user: UserResponse
+}
+
 export interface UploadResponse {
   upload_id: string
   filename: string
@@ -50,4 +56,22 @@ export interface ValidationRunResponse {
 export interface ValidationRunStarted {
   validation_id: string
   status: string
+}
+
+export interface ValidationRunBrief {
+  validation_id: string
+  status: string
+  errors: number
+  warnings: number
+  infos: number
+  completed_at: string | null
+}
+
+export interface UploadHistoryItem {
+  upload_id: string
+  filename: string
+  file_format: string
+  row_count: number | null
+  uploaded_at: string
+  validations: ValidationRunBrief[]
 }

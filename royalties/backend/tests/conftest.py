@@ -47,6 +47,18 @@ async def client(db_session: AsyncSession):
     app.dependency_overrides.clear()
 
 
+@pytest_asyncio.fixture
+async def auth_client(client: AsyncClient):
+    """Provide an authenticated HTTP client (registers a test user)."""
+    resp = await client.post(
+        "/api/auth/register",
+        json={"nickname": "testuser", "password": "testpass"},
+    )
+    token = resp.json()["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
+
+
 @pytest.fixture
 def fixtures_dir() -> Path:
     """Path to the test fixtures directory."""
