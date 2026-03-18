@@ -1,0 +1,30 @@
+royalties-anythingllm  | 
+royalties-anythingllm  | 
+royalties-anythingllm  | No pending migrations to apply.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[EncryptionManager][0m Loaded existing key & salt for encrypting arbitrary data.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [35m[TokenManager][0m Initialized new TokenManager instance for model: gpt-3.5-turbo
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [35m[TokenManager][0m Returning existing instance for model: gpt-3.5-turbo
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: prisma:info Starting a sqlite pool with 25 connections.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [32m[TELEMETRY ENABLED][0m Anonymous Telemetry enabled. Telemetry helps Mintplex Labs Inc improve AnythingLLM.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [32m[TELEMETRY SENT][0m {"event":"server_boot","distinctId":"593f8ecd-a8c4-4c58-9e58-12e8cf39aae7","properties":{"commit":"--","runtime":"docker"}}
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[CommunicationKey][0m RSA key pair generated for signed payloads within AnythingLLM services.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[EncryptionManager][0m Loaded existing key & salt for encrypting arbitrary data.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[PushNotifications][0m Loaded existing VAPID keys!
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[BackgroundWorkerService][0m Starting...
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[BackgroundWorkerService][0m Service started with 1 jobs ["cleanup-orphan-documents"]
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[PushNotifications][0m Loading single user mode subscriptions...
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: Primary server in HTTP mode listening on port 3001
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[MetaGenerator][0m fetching custom meta tag settings...
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[NativeEmbedder][0m Initialized Xenova/all-MiniLM-L6-v2
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [32m[Docker Model Runner][0m initialized with model: docker.io/ai/qwen2.5:3B-Q4_K_M
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[NativeEmbedder][0m Embedded Chunk Group 1 of 1
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [35m[TokenManager][0m Initialized new TokenManager instance for model: docker.io/ai/qwen2.5:3B-Q4_K_M
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[NativeEmbedder][0m Initialized Xenova/all-MiniLM-L6-v2
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [32m[Docker Model Runner][0m initialized with model: docker.io/ai/qwen2.5:3B-Q4_K_M
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [36m[NativeEmbedder][0m Embedded Chunk Group 1 of 1
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [35m[TokenManager][0m Returning existing instance for model: docker.io/ai/qwen2.5:3B-Q4_K_M
+royalties-anythingllm  | prisma:info Starting a sqlite pool with 25 connections.
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: [33m[129:231][0m: No direct uploads path found - exiting.
+royalties-anythingllm  | [36m[bg-worker][0m[33m[cleanup-orphan-documents][0m [32minfo[39m: [33m[129:231][0m: No direct uploads path found - exiting.
+royalties-anythingllm  | [36m[backend][0m [33mwarn[39m: Child process exited with code 0 and signal null
+royalties-anythingllm  | [36m[backend][0m [32minfo[39m: Worker for job "cleanup-orphan-documents" exited with code 0

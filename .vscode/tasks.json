@@ -140,6 +140,16 @@
 			"label": "shadcn add sheet scroll-area tooltip badge",
 			"type": "shell",
 			"command": "powershell -NoProfile -Command 'cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties\\frontend; npx shadcn@latest add sheet scroll-area tooltip badge --overwrite --yes 2>&1'"
+		},
+		{
+			"label": "Check Docker Status",
+			"type": "shell",
+			"command": "docker ps --format \"table {{.Names}}\t{{.Status}}\t{{.Ports}}\" && echo --- && docker logs royalties-backend-1 --tail 5"
+		},
+		{
+			"label": "Test Chat Stream",
+			"type": "shell",
+			"command": "curl -s -X POST http://localhost:8000/api/chat/stream -H \"Content-Type: application/json\" -d \"{\\\"messages\\\":[{\\\"role\\\":\\\"user\\\",\\\"parts\\\":[{\\\"type\\\":\\\"text\\\",\\\"content\\\":\\\"Say hello in markdown with a bullet list\\\"}]}]}\" 2>&1 | Select-Object -First 15"
 		}
 	]
 }

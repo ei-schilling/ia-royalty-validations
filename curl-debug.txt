@@ -1,0 +1,10 @@
+* Host localhost:80 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+*   Trying [::1]:80...
+*   Trying 127.0.0.1:80...
+* connect to ::1 port 80 from :: port 62383 failed: Connection refused
+* connect to 127.0.0.1 port 80 from 0.0.0.0 port 62384 failed: Connection refused
+* Failed to connect to localhost port 80 after 2220 ms: Could not connect to server
+* closing connection #0
+curl: (7) Failed to connect to localhost port 80 after 2220 ms: Could not connect to server
