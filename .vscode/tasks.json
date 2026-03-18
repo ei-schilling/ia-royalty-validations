@@ -275,6 +275,36 @@
 			"label": "Git: Check State",
 			"type": "shell",
 			"command": "powershell -NoProfile -Command \"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git log --oneline -3 2>&1; Write-Host '---'; git status --short 2>&1; Write-Host '---'; git remote show origin 2>&1 | Select-String -Pattern 'main'; Write-Host '=== CHECK DONE ==='\""
+		},
+		{
+			"label": "Git: Force Push Clean",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; git log --oneline -3 2>&1; Write-Host '---STATUS---'; git status --short 2>&1; Write-Host '---PUSHING---'; git push --force-with-lease origin main 2>&1; Write-Host '---DONE---'\""
+		},
+		{
+			"label": "Git Force Push Clean v2",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator; Write-Host 'LOG:'; git log --oneline -3 2>&1; Write-Host '---STATUS:'; git status --short 2>&1; Write-Host '---FORCE-PUSH:'; git push --force-with-lease origin main 2>&1; Write-Host '===ALL_DONE==='\""
+		},
+		{
+			"label": "Git Push Script",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"C:/Users/ei/Projects/royaltyStatementValidator/git_push.sh"
+			]
+		},
+		{
+			"label": "Git Push PS1",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"C:\\Users\\ei\\Projects\\royaltyStatementValidator\\git_push.ps1"
+			]
 		}
 	]
 }

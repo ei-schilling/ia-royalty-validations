@@ -1,6 +1,0 @@
-data: {"type": "RUN_STARTED", "runId": "run-8b4b6c69708f", "timestamp": 1773824469991}
-
-data: {"type": "TEXT_MESSAGE_START", "messageId": "msg-c8faa8ca989c", "role": "assistant", "timestamp": 1773824469991}
-
-data: {"type": "TEXT_MESSAGE_CONTENT", "messageId": "msg-c8faa8ca989c", "delta": "Roy"}
-

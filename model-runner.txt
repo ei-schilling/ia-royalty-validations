@@ -1,1 +1,0 @@
-{"object":"list","data":[{"id":"docker.io/ai/qwen2.5:3B-Q4_K_M","object":"model","created":1744119140,"owned_by":"docker"}]}
