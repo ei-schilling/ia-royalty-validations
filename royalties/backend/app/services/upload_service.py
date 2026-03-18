@@ -2,10 +2,11 @@
 
 from pathlib import Path
 
+from typing import Optional
 from app.validation.parser import parse_file
 
 
-async def process_upload(file_path: Path, file_format: str) -> int | None:
+async def process_upload(file_path: Path, file_format: str) -> Optional[int]:
     """Parse the uploaded file and return the row count.
 
     Returns None if the file cannot be parsed for a row count.

@@ -3,6 +3,8 @@
 from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 
 
+from typing import Optional
+
 class RecipientSharesRule(BaseRule):
     """Validates that recipient percentage shares sum to at most 100%."""
 
@@ -18,7 +20,7 @@ class RecipientSharesRule(BaseRule):
         issues = []
 
         # Collect fordeling percentages per agreement (PDF data)
-        shares: dict[str, list[tuple[float, int | None]]] = {}
+        shares: dict[str, list[tuple[float, Optional[int]]]] = {}
 
         for row in statement_data:
             if row.get("_record_type") != "page_summary":
@@ -65,8 +67,9 @@ class RecipientSharesRule(BaseRule):
                     expected_value="100%",
                     actual_value=f"{total:.1%}",
                     message=(
-                        f"Recipient shares for agreement {aftale} sum to only {total:.1%} "
-                        f"— {1.0 - total:.1%} is unclaimed"
+                        f"Recipient shares for agreement {aftale} sum to only {total:.1%}. "
+                        f"Other recipients or the publisher may receive the remaining share, "
+                        f"which may not be present in this file."
                     ),
                     context={"aftale": aftale, "shares": [p for p, _ in pct_list]},
                 ))

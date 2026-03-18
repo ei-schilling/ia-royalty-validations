@@ -3,6 +3,8 @@
 import uuid
 from datetime import datetime, timezone
 
+
+from typing import Optional, Dict
 from sqlalchemy import String, Integer, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,8 +22,8 @@ class ValidationRun(Base):
     warning_count: Mapped[int] = mapped_column(Integer, default=0)
     error_count: Mapped[int] = mapped_column(Integer, default=0)
     info_count: Mapped[int] = mapped_column(Integer, default=0)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     upload = relationship("Upload", back_populates="validation_runs")
     issues = relationship("ValidationIssue", back_populates="validation_run")
@@ -35,11 +37,11 @@ class ValidationIssue(Base):
     severity: Mapped[str] = mapped_column(String(10))  # error, warning, info
     rule_id: Mapped[str] = mapped_column(String(50))
     rule_description: Mapped[str] = mapped_column(Text)
-    row_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    field: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    expected_value: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    actual_value: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    row_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    field: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    expected_value: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    actual_value: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     message: Mapped[str] = mapped_column(Text)
-    context: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    context: Mapped[Optional[Dict]] = mapped_column(JSON, nullable=True)
 
     validation_run = relationship("ValidationRun", back_populates="issues")

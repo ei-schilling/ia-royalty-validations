@@ -3,6 +3,8 @@
 import uuid
 from datetime import datetime
 
+
+from typing import Optional, Dict
 from pydantic import BaseModel
 
 
@@ -17,12 +19,12 @@ class ValidationIssueSummary(BaseModel):
     severity: str
     rule_id: str
     rule_description: str
-    row_number: int | None
-    field: str | None
-    expected_value: str | None
-    actual_value: str | None
+    row_number: Optional[int]
+    field: Optional[str]
+    expected_value: Optional[str]
+    actual_value: Optional[str]
     message: str
-    context: dict | None
+    context: Optional[Dict]
 
     model_config = {"from_attributes": True}
 
@@ -42,8 +44,8 @@ class ValidationRunResponse(BaseModel):
     validation_id: uuid.UUID
     upload_id: uuid.UUID
     status: str
-    started_at: datetime | None
-    completed_at: datetime | None
+    started_at: Optional[datetime]
+    completed_at: Optional[datetime]
     summary: ValidationSummary
     issues: list[ValidationIssueSummary]
 

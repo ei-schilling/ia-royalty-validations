@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+
+from typing import Optional
 import openpyxl
 import pandas as pd
 import pdfplumber
@@ -241,7 +243,7 @@ def _extract_pdf_sales_lines(text: str) -> list[dict]:
     return sales_lines
 
 
-def _parse_sales_line(line: str) -> dict | None:
+def _parse_sales_line(line: str) -> Optional[dict]:
     """Parse a single sales line from the PDF table.
 
     Expected format varies, but typically:
@@ -341,15 +343,19 @@ def _extract_pdf_summary(text: str) -> dict:
     if udbetaling_match:
         summary["til_udbetaling"] = _danish_number_to_str(udbetaling_match.group(1))
 
-    # Overført til næste (carried forward)
-    overfort_match = re.search(r"Overf.rttil.+?:\s*(-?[\d.,]+)", clean.replace(" ", ""))
+    # Overført fra tidligere (amount carried forward FROM a previous settlement — adds to current base)
+    overfort_match = re.search(r"Overf.rtfra.+?:\s*(-?[\d.,]+)", clean.replace(" ", ""))
     if overfort_match:
         summary["overfort"] = _danish_number_to_str(overfort_match.group(1))
 
-    # Til næste afregning (to next settlement)
+    # Til næste afregning / Overført til næste (amount carried TO next settlement — reduces current payout)
     naeste_match = re.search(r"Tiln.steafregning:\s*(-?[\d.,]+)", clean.replace(" ", ""))
+    if not naeste_match:
+        naeste_match = re.search(r"Overf.rttilN.ste.+?:\s*(-?[\d.,]+)", clean.replace(" ", ""), re.IGNORECASE)
     if naeste_match:
         summary["til_naeste"] = _danish_number_to_str(naeste_match.group(1))
+        # For compatibility with validation logic, also map to carry_forward
+        summary["carry_forward"] = summary["til_naeste"]
 
     return summary
 

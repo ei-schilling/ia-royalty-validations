@@ -1,5 +1,7 @@
 """Abstract base class for validation rules and shared data types."""
 
+
+from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field as dataclass_field
 from enum import Enum
@@ -19,10 +21,10 @@ class ValidationIssue:
     rule_id: str
     rule_description: str
     message: str
-    row_number: int | None = None
-    field: str | None = None
-    expected_value: str | None = None
-    actual_value: str | None = None
+    row_number: Optional[int] = None
+    field: Optional[str] = None
+    expected_value: Optional[str] = None
+    actual_value: Optional[str] = None
     context: dict = dataclass_field(default_factory=dict)
 
 

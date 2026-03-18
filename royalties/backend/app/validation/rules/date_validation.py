@@ -1,6 +1,8 @@
 """Rule 8: Date Validation — checks settlement dates are within valid ranges."""
 
 import re
+
+from typing import Optional, Tuple
 from datetime import datetime
 
 from app.validation.base_rule import BaseRule, Severity, ValidationIssue
@@ -75,7 +77,7 @@ class DateValidationRule(BaseRule):
         return issues
 
 
-def _parse_period(period_str: str) -> tuple[datetime, datetime] | None:
+def _parse_period(period_str: str) -> Optional[Tuple[datetime, datetime]]:
     """Parse a Schilling period string like '01.01.20-31.12.20'."""
     match = re.match(r"(\d{2}\.\d{2}\.\d{2})-(\d{2}\.\d{2}\.\d{2})", period_str)
     if match:
@@ -88,7 +90,7 @@ def _parse_period(period_str: str) -> tuple[datetime, datetime] | None:
     return None
 
 
-def _parse_date(date_str: str) -> datetime | None:
+def _parse_date(date_str: str) -> Optional[datetime]:
     """Try multiple date formats common in Schilling exports."""
     formats = ["%d-%m-%Y", "%d.%m.%Y", "%Y-%m-%d", "%d/%m/%Y", "%d-%m-%y", "%d.%m.%y"]
     for fmt in formats:

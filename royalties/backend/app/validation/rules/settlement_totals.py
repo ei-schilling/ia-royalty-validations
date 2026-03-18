@@ -92,20 +92,33 @@ class SettlementTotalsRule(BaseRule):
                             ))
 
                         # Verify final payout chain
-                        udbetaling = summary.get("til_udbetaling", "")
-                        garanti = summary.get("rest_garanti", "0")
+                        # Formula: (fordeling + overfort_fra_previous + garanti - carry_forward_to_next)
+                        #          × (1 - afgift%) = payout
+                        for_payment = summary.get("til_udbetaling", "")
+                        garanti_raw = summary.get("rest_garanti")  # None if absent
                         afgift = summary.get("afgift", "0")
+                        carry_forward = summary.get("carry_forward", "0")
+                        overfort = summary.get("overfort", "0")  # from previous settlement
+                        garanti_missing = garanti_raw is None
 
-                        if udbetaling:
+                        if for_payment:
                             try:
-                                payout = float(udbetaling)
-                                garanti_val = float(garanti) if garanti else 0.0
+                                payout = float(for_payment)
+                                garanti_val = float(garanti_raw) if garanti_raw else 0.0
                                 afgift_val = float(afgift) if afgift else 0.0
+                                carry_forward_val = float(carry_forward) if carry_forward else 0.0
+                                overfort_val = float(overfort) if overfort else 0.0
 
-                                expected_payout = declared_ford + garanti_val - afgift_val
+                                afgift_base = declared_ford + overfort_val + garanti_val - carry_forward_val
+                                afgift_amount = afgift_base * afgift_val / 100.0
+                                expected_payout = afgift_base - afgift_amount
                                 if abs(expected_payout - payout) > 1.0:
+                                    # If guarantee was absent from the file, we can't fully
+                                    # verify the formula — downgrade to WARNING
+                                    severity = Severity.WARNING if garanti_missing else Severity.ERROR
+                                    extra = " (guarantee amount not present in file; formula may be incomplete)" if garanti_missing else ""
                                     issues.append(ValidationIssue(
-                                        severity=Severity.ERROR,
+                                        severity=severity,
                                         rule_id=self.rule_id,
                                         rule_description=self.description,
                                         row_number=row_num,
@@ -115,12 +128,16 @@ class SettlementTotalsRule(BaseRule):
                                         message=(
                                             f"Page {page_num}: Payout ({payout:.2f}) ≠ "
                                             f"fordeling ({declared_ford:.2f}) + "
+                                            f"overfort ({overfort_val:.2f}) + "
                                             f"garanti ({garanti_val:.2f}) − "
-                                            f"afgift ({afgift_val:.2f}) = {expected_payout:.2f}"
+                                            f"carry_forward ({carry_forward_val:.2f}) − "
+                                            f"afgift ({afgift_val:.2f}% of {afgift_base:.2f} = {afgift_amount:.2f}) = {expected_payout:.2f}"
+                                            f"{extra}"
                                         ),
                                         context={
                                             "page": page_num,
                                             "aftale": summary.get("aftale", ""),
+                                            "garanti_missing": garanti_missing,
                                         },
                                     ))
                             except (ValueError, TypeError):

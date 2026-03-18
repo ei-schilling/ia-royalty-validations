@@ -1,7 +1,7 @@
 """Validation run endpoints."""
 
 import uuid
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -29,7 +29,7 @@ DbSession = Annotated[AsyncSession, Depends(get_db)]
 async def trigger_validation(
     upload_id: uuid.UUID,
     db: DbSession,
-    body: ValidationRunRequest | None = None,
+    body: Optional[ValidationRunRequest] = None,
 ) -> dict:
     """Trigger a validation run on a previously uploaded file."""
     result = await db.execute(select(Upload).where(Upload.id == upload_id))
@@ -80,7 +80,7 @@ async def get_validation(validation_id: uuid.UUID, db: DbSession) -> dict:
 async def get_validation_issues(
     validation_id: uuid.UUID,
     db: DbSession,
-    severity: Annotated[str | None, Query()] = None,
+    severity: Annotated[Optional[str], Query()] = None,
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> list[ValidationIssue]:

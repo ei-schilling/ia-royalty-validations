@@ -3,6 +3,8 @@
 import uuid
 from datetime import datetime
 
+
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -11,7 +13,7 @@ class UploadResponse(BaseModel):
     upload_id: uuid.UUID = Field(validation_alias="id")
     filename: str
     file_format: str
-    row_count: int | None
+    row_count: Optional[int]
     status: str = "uploaded"
     uploaded_at: datetime
 

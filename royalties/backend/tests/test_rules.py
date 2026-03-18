@@ -89,7 +89,7 @@ class TestInvalidRatesRule:
         assert len(issues) == 0
 
     def test_negative_rate_error(self):
-        data = [{"stkafregnsats": "-0.05", "_row_number": 2, "_source": "csv"}]
+        data = [{"stkafregnsats": "-5", "_row_number": 2, "_source": "csv"}]
         issues = self.rule.validate(data)
         errors = [i for i in issues if i.severity == Severity.ERROR]
         assert len(errors) == 1
@@ -103,7 +103,7 @@ class TestInvalidRatesRule:
         assert "zero" in errors[0].message.lower()
 
     def test_high_rate_warning(self):
-        data = [{"stkafregnsats": "0.60", "_row_number": 2, "_source": "csv"}]
+        data = [{"stkafregnsats": "60", "_row_number": 2, "_source": "csv"}]
         issues = self.rule.validate(data)
         warnings = [i for i in issues if i.severity == Severity.WARNING]
         assert len(warnings) == 1
@@ -112,7 +112,7 @@ class TestInvalidRatesRule:
     def test_bad_rates_file(self, fixtures_dir: Path):
         data = parse_file(fixtures_dir / "bad_rates.csv", "csv")
         issues = self.rule.validate(data)
-        # -0.05 → error, 0 → error, 0.60 → warning
+        # -5 → error, 0 → error, 60 → warning
         errors = [i for i in issues if i.severity == Severity.ERROR]
         warnings = [i for i in issues if i.severity == Severity.WARNING]
         assert len(errors) == 2
@@ -162,7 +162,7 @@ class TestAmountConsistencyRule:
 
     def test_exact_amount_passes(self):
         data = [{
-            "antal": "100", "stkpris": "200.00", "stkafregnsats": "0.10",
+            "antal": "100", "stkpris": "200.00", "stkafregnsats": "10",
             "beloeb": "2000.00", "_row_number": 2, "_source": "csv",
         }]
         issues = self.rule.validate(data)
@@ -175,7 +175,7 @@ class TestAmountConsistencyRule:
 
     def test_zero_quantity_skipped(self):
         data = [{
-            "antal": "0", "stkpris": "100", "stkafregnsats": "0.10",
+            "antal": "0", "stkpris": "100", "stkafregnsats": "10",
             "beloeb": "0", "_row_number": 2, "_source": "csv",
         }]
         issues = self.rule.validate(data)
@@ -333,6 +333,121 @@ class TestSettlementTotalsRule:
         data = [{"transtype": "Salg", "_source": "csv", "_row_number": 2}]
         issues = self.rule.validate(data)
         assert len(issues) == 0
+
+    def test_payout_with_carry_forward(self):
+        data = [
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "1000.00",
+            },
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "2000.00",
+            },
+            {
+                "_record_type": "page_summary", "_page_number": "1",
+                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00", "rest_garanti": "0.00",
+                "afgift": "0.00", "carry_forward": "500.00",
+                "til_udbetaling": "2500.00", "_row_number": 199,
+            },
+        ]
+        issues = self.rule.validate(data)
+        # payout = 3000 + 0 - 0 - 500 = 2500, matches til_udbetaling
+        assert len(issues) == 0
+
+    def test_payout_with_carry_forward_error(self):
+        data = [
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "1000.00",
+            },
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "2000.00",
+            },
+            {
+                "_record_type": "page_summary", "_page_number": "1",
+                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00", "rest_garanti": "0.00",
+                "afgift": "0.00", "carry_forward": "500.00",
+                "til_udbetaling": "2000.00", "_row_number": 199,
+            },
+        ]
+        issues = self.rule.validate(data)
+        # payout should be 2500, but is 2000, so error expected
+        errors = [i for i in issues if i.severity == Severity.ERROR]
+        assert len(errors) == 1
+        assert "carry_forward" in errors[0].message
+
+    def test_payout_mismatch_without_garanti_is_warning(self):
+        data = [
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "3000.00",
+            },
+            {
+                "_record_type": "page_summary", "_page_number": "1",
+                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00",
+                # rest_garanti intentionally absent
+                "afgift": "0.00", "carry_forward": "0.00",
+                "til_udbetaling": "2500.00", "_row_number": 199,
+            },
+        ]
+        issues = self.rule.validate(data)
+        # Mismatch but garanti missing → WARNING not ERROR
+        errors = [i for i in issues if i.severity == Severity.ERROR]
+        warnings = [i for i in issues if i.severity == Severity.WARNING]
+        assert len(errors) == 0
+        assert len(warnings) == 1
+        assert "not present in file" in warnings[0].message
+
+    def test_payout_with_afgift_percentage(self):
+        data = [
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "1000.00",
+            },
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "2000.00",
+            },
+            {
+                "_record_type": "page_summary", "_page_number": "1",
+                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00", "rest_garanti": "200.00",
+                "afgift": "10.0", "carry_forward": "100.00",
+                "til_udbetaling": "2790.00", "_row_number": 199,
+            },
+        ]
+        # afgift base = 3000 + 200 - 100 = 3100, afgift = 3100 * 0.10 = 310, payout = 3100 - 310 = 2790
+        issues = self.rule.validate(data)
+        assert len(issues) == 0
+
+    def test_payout_with_afgift_percentage_error(self):
+        data = [
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "1000.00",
+            },
+            {
+                "_record_type": "sales_line", "_page_number": "1",
+                "royalty_amount": "2000.00",
+            },
+            {
+                "_record_type": "page_summary", "_page_number": "1",
+                "fordeling_pct": "1.0", "fordeling_base": "3000.00",
+                "fordeling_amount": "3000.00", "rest_garanti": "200.00",
+                "afgift": "10.0", "carry_forward": "100.00",
+                "til_udbetaling": "2500.00", "_row_number": 199,
+            },
+        ]
+        # payout should be 2790, but is 2500, so error expected
+        issues = self.rule.validate(data)
+        errors = [i for i in issues if i.severity == Severity.ERROR]
+        assert len(errors) == 1
+        assert "afgift" in errors[0].message
 
 
 # ---------------------------------------------------------------------------
