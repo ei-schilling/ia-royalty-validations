@@ -110,7 +110,7 @@ async def get_upload(
     return upload
 
 
-MAX_PREVIEW_ROWS = 200
+MAX_PREVIEW_ROWS = 50_000
 
 
 @router.get("/{upload_id}/content")

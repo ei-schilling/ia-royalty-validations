@@ -214,7 +214,7 @@ export default function ResultsPage() {
   const passedRules = ALL_RULES.filter((r) => !errorRuleIds.has(r.rule_id))
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 h-full">
+    <div className="flex flex-col lg:flex-row gap-0 flex-1 min-h-0">
       {/* Mobile panel toggle bar — shows when panel is available but stacked */}
       <div className="flex lg:hidden items-center gap-1 border-b border-border/50 -mx-4 sm:-mx-6 px-4 shrink-0">
         <button
@@ -607,7 +607,7 @@ export default function ResultsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="flex-1 lg:border-l border-border/50 flex flex-col h-full overflow-hidden bg-card/30"
+            className="flex-1 min-h-0 lg:border-l border-border/50 flex flex-col overflow-hidden bg-card/30"
           >
             {/* Panel tabs — desktop only (mobile uses top bar) */}
             <div className="hidden lg:flex items-center border-b border-border/50 shrink-0">

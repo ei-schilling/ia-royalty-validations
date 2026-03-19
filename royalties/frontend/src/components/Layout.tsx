@@ -47,14 +47,9 @@ export default function Layout() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl backdrop-saturate-150">
-        <div
-          className={cn(
-            'mx-auto flex items-center justify-between px-4 sm:px-6 h-14',
-            isFullWidth ? 'max-w-full' : 'max-w-6xl',
-          )}
-        >
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+        <div className="flex items-center h-14 px-4 sm:px-6">
+          {/* Left — Logo */}
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
               <BookOpenCheck className="h-4.5 w-4.5 text-primary" />
               <div className="absolute inset-0 rounded-lg ring-1 ring-primary/20 group-hover:ring-primary/40 transition-all" />
@@ -69,57 +64,58 @@ export default function Layout() {
             </div>
           </Link>
 
-          {/* Nav + Actions */}
-          <div className="flex items-center gap-1">
-            {user && (
-              <>
-                {/* Mobile menu toggle */}
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="sm:hidden text-muted-foreground"
-                >
-                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                </Button>
-
-                {/* Breadcrumb nav */}
-                <nav className="hidden sm:flex items-center mr-4 text-xs text-muted-foreground">
-                  <Link
-                    to="/upload"
-                    className={cn(
-                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors',
-                      isUpload
-                        ? 'bg-muted text-foreground'
-                        : 'hover:text-foreground hover:bg-muted/50',
-                    )}
-                  >
-                    <Upload className="h-3.5 w-3.5" />
-                    Upload
-                  </Link>
-                  {isResults && (
-                    <>
-                      <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground/40" />
-                      <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted text-foreground">
-                        <Shield className="h-3.5 w-3.5" />
-                        Results
-                      </span>
-                    </>
+          {user && (
+            <>
+              {/* Center — Navigation */}
+              <nav className="hidden sm:flex items-center gap-1 mx-auto text-sm text-muted-foreground">
+                <Link
+                  to="/upload"
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors',
+                    isUpload
+                      ? 'bg-muted text-foreground font-medium'
+                      : 'hover:text-foreground hover:bg-muted/50',
                   )}
-                  <Link
-                    to="/help"
-                    className={cn(
-                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors',
-                      isHelp
-                        ? 'bg-muted text-foreground'
-                        : 'hover:text-foreground hover:bg-muted/50',
-                    )}
-                  >
-                    <Bot className="h-3.5 w-3.5" />
-                    Help
-                  </Link>
-                </nav>
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                </Link>
+                {isResults && (
+                  <>
+                    <ChevronRight className="h-3 w-3 text-muted-foreground/40" />
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-foreground font-medium">
+                      <Shield className="h-3.5 w-3.5" />
+                      Results
+                    </span>
+                  </>
+                )}
+                <Link
+                  to="/help"
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors',
+                    isHelp
+                      ? 'bg-muted text-foreground font-medium'
+                      : 'hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  <Bot className="h-3.5 w-3.5" />
+                  Help
+                </Link>
+              </nav>
 
+              {/* Mobile menu toggle */}
+              <div className="flex-1 sm:hidden" />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="sm:hidden text-muted-foreground"
+              >
+                {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              </Button>
+
+              {/* Right — Actions */}
+              <div className="hidden sm:flex items-center gap-1 shrink-0">
                 <Button
                   variant={historyOpen ? 'secondary' : 'ghost'}
                   size="sm"
@@ -139,7 +135,7 @@ export default function Layout() {
                       {user.nickname[0]}
                     </span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium hidden sm:inline max-w-[80px] truncate">
+                  <span className="text-xs text-muted-foreground font-medium max-w-[80px] truncate">
                     {user.nickname}
                   </span>
                 </div>
@@ -152,10 +148,13 @@ export default function Layout() {
                 >
                   <LogOut className="h-3.5 w-3.5" />
                 </Button>
-              </>
-            )}
-            <ThemeToggle />
-          </div>
+
+                <ThemeToggle />
+              </div>
+            </>
+          )}
+          {!user && <div className="flex-1" />}
+          {!user && <ThemeToggle />}
         </div>
       </header>
 
@@ -214,7 +213,7 @@ export default function Layout() {
       {/* Content */}
       <main
         className={cn(
-          'flex-1 w-full',
+          'flex-1 w-full flex flex-col',
           isFullWidth
             ? 'max-w-full px-4 sm:px-6 py-2 sm:py-3 overflow-hidden'
             : 'mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8',

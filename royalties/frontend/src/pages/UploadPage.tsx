@@ -1,8 +1,9 @@
 /** Upload page — batch-capable drag-and-drop with animated progress. */
 
 import { motion, AnimatePresence } from 'motion/react'
-import { Upload, Sparkles, ArrowRight, RotateCcw } from 'lucide-react'
+import { Upload, Sparkles, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import {
   DropZone,
   FileQueueList,
@@ -35,7 +36,10 @@ export default function UploadPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6 max-w-2xl mx-auto"
+      className={cn(
+        'space-y-6 mx-auto w-full my-auto transition-all duration-500',
+        isCompleted ? 'max-w-6xl' : 'max-w-2xl',
+      )}
     >
       {/* Header */}
       <div>
@@ -153,20 +157,11 @@ export default function UploadPage() {
             exit={{ opacity: 0 }}
             className="space-y-4"
           >
-            <BatchSummary files={queue.files} elapsed={batch.elapsed} />
-
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 h-11 gap-2" onClick={handleStartOver}>
-                <RotateCcw className="h-4 w-4" />
-                Upload More
-              </Button>
-              {queue.files.filter((f) => f.status === 'completed').length === 1 && (
-                <Button className="flex-1 h-11 gap-2" onClick={batch.viewFirstResult}>
-                  View Results
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <BatchSummary
+              files={queue.files}
+              elapsed={batch.elapsed}
+              onStartOver={handleStartOver}
+            />
           </motion.div>
         )}
       </AnimatePresence>
