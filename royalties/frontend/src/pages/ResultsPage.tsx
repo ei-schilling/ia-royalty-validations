@@ -365,116 +365,202 @@ export default function ResultsPage() {
         </div>
 
         {/* Stats strip */}
-        <div
-          className={cn(
-            'grid gap-2 sm:gap-3',
-            panelOpen ? 'grid-cols-3' : 'grid-cols-3 sm:grid-cols-5',
-          )}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="relative rounded-2xl border border-border/30 overflow-hidden bg-gradient-to-br from-card via-card/95 to-card/80"
         >
-          {/* Pass rate */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
+          {/* Ambient glow — hue shifts with pass rate */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.06]"
+            style={{
+              background: `radial-gradient(ellipse at 10% 50%, ${rateColor(passRate)} 0%, transparent 55%), radial-gradient(ellipse at 90% 30%, oklch(0.55 0.15 25 / 0.3), transparent 55%)`,
+            }}
+          />
+
+          <div
             className={cn(
-              'rounded-xl border p-3 sm:p-4 flex flex-col items-center justify-center gap-1.5 sm:gap-2 row-span-2 sm:row-span-1',
-              hasIssues ? 'border-border/50 bg-card' : 'border-emerald-500/20 bg-emerald-500/5',
+              'relative grid divide-x divide-border/15',
+              panelOpen ? 'grid-cols-3' : 'grid-cols-3 sm:grid-cols-5',
             )}
           >
-            <div className="relative w-12 h-12 sm:w-16 sm:h-16">
-              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  className="text-border/30"
+            {/* ─ Pass rate hero ─ */}
+            <div className="relative flex items-center gap-4 p-4 sm:p-5 row-span-2 sm:row-span-1 overflow-hidden">
+              {/* Subtle background gradient matching pass rate */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.07]"
+                style={{
+                  background: `linear-gradient(135deg, ${rateColor(passRate)}, transparent 70%)`,
+                }}
+              />
+
+              <div className="relative">
+                {/* Outer glow ring */}
+                <div
+                  className="absolute -inset-1 rounded-full blur-md opacity-25"
+                  style={{ backgroundColor: rateColor(passRate) }}
                 />
-                <motion.circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  fill="none"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  className={hasIssues ? 'text-primary' : 'text-emerald-400'}
-                  strokeDasharray={`${2 * Math.PI * 42}`}
-                  initial={hasAnimated.current ? false : { strokeDashoffset: 2 * Math.PI * 42 }}
-                  animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - passRate / 100) }}
-                  transition={
-                    hasAnimated.current
-                      ? { duration: 0 }
-                      : { delay: 0.3, duration: 1, ease: 'easeOut' }
-                  }
-                  onAnimationComplete={() => {
-                    hasAnimated.current = true
-                  }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-display text-base sm:text-lg font-bold text-foreground leading-none">
-                  {passRate}%
-                </span>
+                <div className="relative w-14 h-14 sm:w-[4.5rem] sm:h-[4.5rem]">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                    {/* Background track */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="42"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="5"
+                      className="text-border/15"
+                    />
+                    {/* Animated arc — color from pass rate */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="42"
+                      fill="none"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      stroke={rateColor(passRate)}
+                      strokeDasharray={`${2 * Math.PI * 42}`}
+                      initial={hasAnimated.current ? false : { strokeDashoffset: 2 * Math.PI * 42 }}
+                      animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - passRate / 100) }}
+                      transition={
+                        hasAnimated.current
+                          ? { duration: 0 }
+                          : { delay: 0.3, duration: 1.2, ease: 'easeOut' }
+                      }
+                      onAnimationComplete={() => {
+                        hasAnimated.current = true
+                      }}
+                      style={{
+                        filter: `drop-shadow(0 0 8px ${rateColor(passRate)}80)`,
+                      }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span
+                      className="font-display text-lg sm:text-xl font-extrabold leading-none tracking-tight"
+                      style={{ color: rateColor(passRate) }}
+                    >
+                      {passRate}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative z-[1]">
+                <p className="text-sm font-bold text-foreground leading-tight">
+                  {summary.passed_checks}
+                  <span className="text-muted-foreground/40 font-normal">
+                    /{summary.rules_executed}
+                  </span>
+                </p>
+                <p
+                  className="text-[11px] font-semibold mt-0.5"
+                  style={{ color: rateColor(passRate) }}
+                >
+                  {passRate === 100
+                    ? 'Perfect'
+                    : passRate >= 95
+                      ? 'Almost There'
+                      : passRate >= 85
+                        ? 'Needs Fixes'
+                        : passRate >= 70
+                          ? 'Review Required'
+                          : 'Critical'}
+                </p>
+                <p className="text-[9px] text-muted-foreground/40 mt-0.5 uppercase tracking-widest font-medium">
+                  checks passed
+                </p>
               </div>
             </div>
-            <p
-              className={cn(
-                'text-[10px] font-medium text-center leading-tight',
-                hasIssues ? 'text-muted-foreground' : 'text-emerald-400',
-              )}
-            >
-              {summary.passed_checks}/{summary.rules_executed} passed
-            </p>
-          </motion.div>
 
-          {/* Metric cards */}
-          <MetricCard
-            label="Passed"
-            value={summary.passed_checks}
-            subtitle="No errors"
-            icon={CheckCircle2}
-            color="text-emerald-400"
-            bg="bg-emerald-500/10"
-            onClick={() => toggleSection('passed')}
-            active={openSections.passed}
-            delay={0.15}
-          />
-          <MetricCard
-            label="Errors"
-            value={summary.errors}
-            subtitle="Critical"
-            icon={AlertCircle}
-            color="text-red-400"
-            bg="bg-red-500/10"
-            onClick={() => toggleSection('error')}
-            active={openSections.error}
-            delay={0.2}
-          />
-          <MetricCard
-            label="Warnings"
-            value={summary.warnings}
-            subtitle="Review needed"
-            icon={AlertTriangle}
-            color="text-amber-400"
-            bg="bg-amber-500/10"
-            onClick={() => toggleSection('warning')}
-            active={openSections.warning}
-            delay={0.25}
-          />
-          <MetricCard
-            label="Info"
-            value={summary.infos}
-            subtitle="Observations"
-            icon={Info}
-            color="text-sky-400"
-            bg="bg-sky-500/10"
-            onClick={() => toggleSection('info')}
-            active={openSections.info}
-            delay={0.3}
-          />
-        </div>
+            {/* Metric cells */}
+            <MetricCell
+              label="Passed"
+              value={summary.passed_checks}
+              icon={CheckCircle2}
+              color="emerald"
+              delay={0.15}
+              onClick={() => toggleSection('passed')}
+              active={openSections.passed}
+            />
+            <MetricCell
+              label="Errors"
+              value={summary.errors}
+              icon={AlertCircle}
+              color="red"
+              delay={0.2}
+              onClick={() => toggleSection('error')}
+              active={openSections.error}
+            />
+            <MetricCell
+              label="Warnings"
+              value={summary.warnings}
+              icon={AlertTriangle}
+              color="amber"
+              delay={0.25}
+              onClick={() => toggleSection('warning')}
+              active={openSections.warning}
+            />
+            <MetricCell
+              label="Info"
+              value={summary.infos}
+              icon={Info}
+              color="sky"
+              delay={0.3}
+              onClick={() => toggleSection('info')}
+              active={openSections.info}
+            />
+          </div>
+
+          {/* Distribution bar */}
+          {(() => {
+            const total =
+              summary.passed_checks + summary.errors + summary.warnings + summary.infos || 1
+            return (
+              <div className="flex h-1">
+                {summary.passed_checks > 0 && (
+                  <motion.div
+                    className="bg-emerald-500"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${(summary.passed_checks / total) * 100}%`,
+                    }}
+                    transition={{ delay: 0.6, duration: 0.8, ease: 'easeOut' }}
+                  />
+                )}
+                {summary.errors > 0 && (
+                  <motion.div
+                    className="bg-red-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(summary.errors / total) * 100}%` }}
+                    transition={{ delay: 0.7, duration: 0.8, ease: 'easeOut' }}
+                  />
+                )}
+                {summary.warnings > 0 && (
+                  <motion.div
+                    className="bg-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${(summary.warnings / total) * 100}%`,
+                    }}
+                    transition={{ delay: 0.8, duration: 0.8, ease: 'easeOut' }}
+                  />
+                )}
+                {summary.infos > 0 && (
+                  <motion.div
+                    className="bg-sky-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(summary.infos / total) * 100}%` }}
+                    transition={{ delay: 0.9, duration: 0.8, ease: 'easeOut' }}
+                  />
+                )}
+              </div>
+            )
+          })()}
+        </motion.div>
 
         {/* ── Collapsible sections ─────────────────────── */}
 
@@ -800,72 +886,167 @@ function IssueSection({
   )
 }
 
-/* ─── Metric card ────────────────────────────────────── */
+/* ─── Rate → color (red → amber → emerald) ───────────── */
 
-function MetricCard({
+function rateColor(rate: number): string {
+  // Only 100% is green. Everything else shifts red → amber.
+  // oklch hue: 30 (red) → 70 (orange) → 100 (amber) → 155 (emerald at 100% only)
+  if (rate === 100) return 'oklch(0.72 0.2 155)'
+  // 0-99%: red → amber (never reaches green)
+  const hue = 30 + (rate / 99) * 70 // 30 → 100
+  const chroma = 0.2
+  const lightness = 0.6 + (rate / 99) * 0.08
+  return `oklch(${lightness} ${chroma} ${hue})`
+}
+
+/* ─── Animated counter ────────────────────────────────── */
+
+function AnimatedNumber({ value, delay = 0 }: { value: number; delay?: number }) {
+  const [display, setDisplay] = useState(0)
+  const hasRun = useRef(false)
+
+  useEffect(() => {
+    if (hasRun.current) {
+      setDisplay(value)
+      return
+    }
+    if (value === 0) {
+      setDisplay(0)
+      hasRun.current = true
+      return
+    }
+    const timeout = setTimeout(() => {
+      const duration = 900
+      const start = performance.now()
+      const step = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setDisplay(Math.round(eased * value))
+        if (progress < 1) requestAnimationFrame(step)
+        else hasRun.current = true
+      }
+      requestAnimationFrame(step)
+    }, delay * 1000)
+    return () => clearTimeout(timeout)
+  }, [value, delay])
+
+  return <span>{display}</span>
+}
+
+/* ─── Metric cell ────────────────────────────────────── */
+
+const METRIC_COLORS = {
+  emerald: {
+    glow: 'bg-emerald-400/20',
+    text: 'text-emerald-400',
+    iconBg: 'bg-emerald-500/10',
+    iconBorder: 'border-emerald-500/25',
+    activeBg: 'bg-emerald-500/5',
+    activeBorder: 'border-emerald-500/30',
+  },
+  red: {
+    glow: 'bg-red-400/20',
+    text: 'text-red-400',
+    iconBg: 'bg-red-500/10',
+    iconBorder: 'border-red-500/25',
+    activeBg: 'bg-red-500/5',
+    activeBorder: 'border-red-500/30',
+  },
+  amber: {
+    glow: 'bg-amber-400/20',
+    text: 'text-amber-400',
+    iconBg: 'bg-amber-500/10',
+    iconBorder: 'border-amber-500/25',
+    activeBg: 'bg-amber-500/5',
+    activeBorder: 'border-amber-500/30',
+  },
+  sky: {
+    glow: 'bg-sky-400/20',
+    text: 'text-sky-400',
+    iconBg: 'bg-sky-500/10',
+    iconBorder: 'border-sky-500/25',
+    activeBg: 'bg-sky-500/5',
+    activeBorder: 'border-sky-500/30',
+  },
+} as const
+
+function MetricCell({
   label,
   value,
-  subtitle,
   icon: Icon,
   color,
-  bg,
   onClick,
   active,
   delay = 0,
 }: {
   label: string
   value: number
-  subtitle: string
   icon: typeof CheckCircle2
-  color: string
-  bg: string
+  color: keyof typeof METRIC_COLORS
   onClick?: () => void
   active?: boolean
   delay?: number
 }) {
+  const c = METRIC_COLORS[color]
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+    <motion.button
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
       className={cn(
-        'rounded-xl border p-3 sm:p-4 flex flex-col items-center text-center transition-all duration-200',
-        onClick &&
-          'cursor-pointer hover:border-primary/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none',
-        active
-          ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
-          : 'border-border/50 bg-card',
+        'relative flex flex-col items-center justify-center gap-1 p-3 sm:p-4 transition-all duration-200',
+        'hover:bg-white/[0.02] active:scale-[0.97]',
+        'focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none',
+        active && cn(c.activeBg, 'border-t-2', c.activeBorder),
+        !active && 'border-t-2 border-transparent',
       )}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onClick()
-              }
-            }
-          : undefined
-      }
     >
-      <div
+      {/* Icon with glow ring */}
+      <div className="relative mb-1.5">
+        {value > 0 && (
+          <motion.div
+            className={cn('absolute -inset-1.5 rounded-full', c.glow)}
+            animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
+        <div
+          className={cn(
+            'relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center',
+            'border transition-colors',
+            value > 0 ? cn(c.iconBg, c.iconBorder) : 'bg-muted/20 border-border/20',
+          )}
+        >
+          <Icon
+            className={cn(
+              'h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]',
+              value > 0 ? c.text : 'text-muted-foreground/25',
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Animated number */}
+      <p
         className={cn(
-          'w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 sm:mb-3',
-          bg,
+          'font-display text-2xl sm:text-3xl font-extrabold leading-none tracking-tight',
+          value > 0 ? 'text-foreground' : 'text-muted-foreground/40',
         )}
       >
-        <Icon className={cn('h-3.5 w-3.5 sm:h-4 sm:w-4', color)} />
-      </div>
-      <p className="font-display text-xl sm:text-2xl font-bold text-foreground leading-none">
-        {value}
+        <AnimatedNumber value={value} delay={delay} />
       </p>
-      <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 sm:mt-1.5 truncate w-full">
+
+      {/* Label */}
+      <p
+        className={cn(
+          'text-[10px] sm:text-[11px] font-medium uppercase tracking-wider mt-0.5',
+          active ? c.text : 'text-muted-foreground/60',
+        )}
+      >
         {label}
       </p>
-      <p className="text-[10px] text-muted-foreground/50 mt-0.5 truncate w-full">{subtitle}</p>
-    </motion.div>
+    </motion.button>
   )
 }
 
