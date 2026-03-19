@@ -4,7 +4,7 @@ from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 
 
 class MissingTitlesRule(BaseRule):
-    """Checks that every row has a non-empty product identifier (ISBN/Artnr/Titel)."""
+    """Checks that every row has a product identifier (ISBN/Artnr/Titel) or an agreement name."""
 
     @property
     def rule_id(self) -> str:
@@ -12,7 +12,7 @@ class MissingTitlesRule(BaseRule):
 
     @property
     def description(self) -> str:
-        return "Every row must have a product identifier (ISBN, Artnr, or Titel)"
+        return "Every row must have a product identifier (ISBN, Artnr, Titel, or Aftale)"
 
     def validate(self, statement_data: list[dict]) -> list[ValidationIssue]:
         issues = []
@@ -25,20 +25,20 @@ class MissingTitlesRule(BaseRule):
             # Check standard CSV/JSON fields
             artnr = row.get("artnr", "").strip()
             titel = row.get("titel", "").strip()
+            aftale = row.get("aftale", "").strip()
 
-            if not artnr and not titel:
+            if not artnr and not titel and not aftale:
                 issues.append(
                     ValidationIssue(
                         severity=Severity.ERROR,
                         rule_id=self.rule_id,
                         rule_description=self.description,
                         row_number=row_num,
-                        field="artnr/titel",
-                        expected_value="non-empty product identifier",
+                        field="artnr/titel/aftale",
+                        expected_value="non-empty product identifier or agreement name",
                         actual_value="(empty)",
-                        message="Missing product identifier — no Artnr or Titel found",
+                        message="Missing product identifier — no Artnr, Titel, or Aftale found",
                         context={
-                            "aftale": row.get("aftale", ""),
                             "kontonr": row.get("kontonr", ""),
                         },
                     )

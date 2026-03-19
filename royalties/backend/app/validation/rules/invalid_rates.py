@@ -50,7 +50,6 @@ class InvalidRatesRule(BaseRule):
             sats_type = row.get("sats_type", "percentage")
 
             if sats_type == "percentage":
-                rate_fraction = rate / 100.0
                 if rate < 0:
                     issues.append(
                         ValidationIssue(
@@ -85,7 +84,7 @@ class InvalidRatesRule(BaseRule):
                             },
                         )
                     )
-                elif rate > settings.max_rate_threshold:
+                elif rate * 100 > settings.max_rate_threshold:
                     issues.append(
                         ValidationIssue(
                             severity=Severity.WARNING,
@@ -93,10 +92,10 @@ class InvalidRatesRule(BaseRule):
                             rule_description=self.description,
                             row_number=row_num,
                             field="stkafregnsats",
-                            expected_value=f"<= {settings.max_rate_threshold}",
-                            actual_value=str(rate),
-                            message=f"Royalty rate {rate:.1f%} exceeds typical threshold "
-                            f"({settings.max_rate_threshold:.0f%})",
+                            expected_value=f"<= {settings.max_rate_threshold:.0f}%",
+                            actual_value=f"{rate * 100:.1f}%",
+                            message=f"Royalty rate {rate * 100:.1f}% exceeds typical threshold "
+                            f"({settings.max_rate_threshold:.0f}%)",
                             context={
                                 "aftale": row.get("aftale", ""),
                                 "artnr": row.get("artnr", ""),

@@ -42,6 +42,10 @@ class AdvanceBalanceRule(BaseRule):
         for aftale, offset_total in offsets.items():
             advance_total = advances.get(aftale, 0)
             if offset_total > advance_total and advance_total > 0:
+                # advance_total == 0 means the original advance was paid in a prior
+                # settlement file that is not present in this upload. We cannot
+                # determine over-recoupment without the original amount, so we skip
+                # rather than raising a false positive.
                 issues.append(
                     ValidationIssue(
                         severity=Severity.ERROR,

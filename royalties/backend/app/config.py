@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
     amount_tolerance: float = 0.01
-    max_rate_threshold: float = 1.00
+    max_rate_threshold: float = 100.0
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480
