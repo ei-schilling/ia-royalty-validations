@@ -36,7 +36,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[85vh] flex relative">
+    <div className="flex-1 flex relative">
       <AuthBackground />
       {/* Left — branding panel */}
       <motion.div

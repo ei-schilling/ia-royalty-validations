@@ -37,8 +37,8 @@ export default function UploadPage() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        'space-y-6 mx-auto w-full my-auto transition-all duration-500',
-        isCompleted ? 'max-w-6xl' : 'max-w-2xl',
+        'space-y-6 mx-auto w-full flex-1 min-h-0 flex flex-col transition-all duration-500',
+        isCompleted ? 'max-w-6xl' : queue.files.length > 0 ? 'max-w-4xl' : 'max-w-2xl',
       )}
     >
       {/* Header */}
@@ -155,7 +155,7 @@ export default function UploadPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-4"
+            className="flex-1 min-h-0"
           >
             <BatchSummary
               files={queue.files}

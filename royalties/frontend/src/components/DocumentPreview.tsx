@@ -123,7 +123,7 @@ export default function DocumentPreview({ uploadId, onContentLoaded }: Props) {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter rows…"
-              className="text-xs h-7 pl-7 bg-background/50"
+              className="text-xs h-7 pl-7"
             />
           </div>
         </div>

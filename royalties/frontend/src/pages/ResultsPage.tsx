@@ -275,7 +275,7 @@ export default function ResultsPage() {
           setShowScrollTop(target.scrollTop > 300)
         }}
         className={cn(
-          'relative space-y-6 lg:space-y-8 pb-6 overflow-y-auto lg:pr-4 transition-all duration-300 scrollbar-gutter-stable',
+          'relative space-y-4 lg:space-y-6 pb-4 overflow-y-auto lg:pr-4 transition-all duration-300 scrollbar-gutter-stable',
           // On mobile: full width, hidden when panel is open
           panelOpen ? 'hidden lg:block' : 'flex-1',
           // On desktop: 40% or full width
@@ -283,7 +283,7 @@ export default function ResultsPage() {
         )}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 sticky top-0 z-10 bg-background pb-3 -mb-3">
           <div className="min-w-0">
             <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
               <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />

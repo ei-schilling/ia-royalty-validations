@@ -49,7 +49,7 @@ export default function RegisterPage() {
   const strengthColor = ['', 'bg-destructive', 'bg-amber-500', 'bg-emerald-500'][strength]
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 relative">
+    <div className="flex-1 flex items-center justify-center px-4 relative">
       <AuthBackground />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -136,7 +136,7 @@ export default function RegisterPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               maxLength={128}
-              className="h-11 bg-muted/30 border-border/50 focus-visible:bg-background"
+              className="h-11 border-border/50"
             />
           </div>
 

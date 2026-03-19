@@ -38,7 +38,7 @@ export default function Layout() {
   const isFullWidth = isResults // Results page needs full width for the document panel
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="h-dvh flex flex-col relative overflow-hidden">
       {/* Ambient background gradient */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/[0.03] rounded-full blur-[120px]" />
@@ -213,32 +213,29 @@ export default function Layout() {
       {/* Content */}
       <main
         className={cn(
-          'flex-1 w-full flex flex-col',
+          'flex-1 min-h-0 w-full flex flex-col',
           isFullWidth
-            ? 'max-w-full px-4 sm:px-6 py-2 sm:py-3 overflow-hidden'
-            : 'mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8',
+            ? 'max-w-full px-4 sm:px-6 pt-3 pb-1 overflow-hidden'
+            : 'mx-auto max-w-6xl px-4 sm:px-6 pt-3 pb-3 overflow-y-auto',
         )}
       >
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className={cn('border-t border-border/50', isFullWidth ? 'py-2' : 'py-5')}>
-        <div
-          className={cn(
-            'mx-auto px-4 sm:px-6 flex items-center justify-between',
-            isFullWidth ? 'max-w-full' : 'max-w-6xl',
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground/50" />
-            <span className="text-xs text-muted-foreground/70">Royalty Statement Validator</span>
+      {/* Footer — hidden on full-width pages to maximise vertical space */}
+      {!isFullWidth && (
+        <footer className="border-t border-border/50 py-3 shrink-0">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground/50" />
+              <span className="text-xs text-muted-foreground/70">Royalty Statement Validator</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground/50 font-mono">
+              Schilling ERP &middot; v1.0
+            </span>
           </div>
-          <span className="text-[10px] text-muted-foreground/50 font-mono">
-            Schilling ERP &middot; v1.0
-          </span>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* History sidebar */}
       <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
