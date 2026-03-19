@@ -374,43 +374,65 @@ def _write_xlsx(rows: list[dict], path: Path):
 
 
 def _write_pseudo_pdf(rows: list[dict], path: Path):
-    """Write a Schilling-style text 'PDF' with headers and settlement layout.
-    
-    This creates a realistic text file that mimics the structure of
-    Schilling royalty PDFs — useful for training RAG systems on the format.
+    """Write a Schilling-style royalty settlement as a real PDF.
+
+    Uses fpdf2 to generate a valid PDF with the same structured layout
+    that Schilling royalty PDFs use — suitable for RAG ingestion and preview.
     """
+    from fpdf import FPDF
+
     author = rows[0]["KONTO"] if rows else "AUTH-0000"
     agreement = rows[0]["AFTALE"] if rows else "AFT-0000-000"
     batch = rows[0]["AFREGNBATCH"] if rows else "0000"
-    
-    # Pick a random author name
+
     author_name = next((a[1] for a in AUTHORS if a[0] == author), "Unknown Author")
     title = random.choice(TITLES)
-    
+
     base_date = _random_date(2020, 2026)
     period_start = base_date - timedelta(days=180)
     period_end = base_date
-    
-    lines: list[str] = []
-    lines.append("=" * 80)
-    lines.append(f"  SCHILLING  —  Royalty afregning")
-    lines.append(f"  Afregning nr: {batch}")
-    lines.append(f"  Periode: {period_start.strftime('%d.%m.%y')}-{period_end.strftime('%d.%m.%y')}")
-    lines.append("=" * 80)
-    lines.append("")
-    lines.append(f"  Titel:         {title}")
-    lines.append(f"  Kontonr:       {author}")
-    lines.append(f"  Forfatter:     {author_name}")
-    lines.append(f"  Aftale:        {agreement}")
-    lines.append(f"  Primo lager:   {random.randint(100, 5000)}")
-    lines.append(f"  Ultimo lager:  {random.randint(50, 4000)}")
-    lines.append(f"  Frieksemplarer: {random.randint(0, 50)}")
-    lines.append(f"  Makulatur:     {random.randint(0, 200)}")
-    lines.append("")
-    lines.append("-" * 80)
-    lines.append(f"  {'Salgskanal':<15} {'Prisgruppe':<12} {'Sats':<10} {'Antal':>8} {'Prisgrundlag':>14} {'Royalty':>12}")
-    lines.append("-" * 80)
 
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # ── Header block ──
+    pdf.set_font("Courier", "B", 11)
+    pdf.cell(0, 6, "=" * 72, ln=True)
+    pdf.set_font("Courier", "B", 12)
+    pdf.cell(0, 7, "  SCHILLING  -  Royalty afregning", ln=True)
+    pdf.set_font("Courier", "", 10)
+    pdf.cell(0, 6, f"  Afregning nr: {batch}", ln=True)
+    pdf.cell(0, 6, f"  Periode: {period_start.strftime('%d.%m.%y')}-{period_end.strftime('%d.%m.%y')}", ln=True)
+    pdf.set_font("Courier", "B", 11)
+    pdf.cell(0, 6, "=" * 72, ln=True)
+    pdf.ln(3)
+
+    # ── Meta fields ──
+    pdf.set_font("Courier", "", 10)
+    meta = [
+        ("Titel:", title),
+        ("Kontonr:", author),
+        ("Forfatter:", author_name),
+        ("Aftale:", agreement),
+        ("Primo lager:", str(random.randint(100, 5000))),
+        ("Ultimo lager:", str(random.randint(50, 4000))),
+        ("Frieksemplarer:", str(random.randint(0, 50))),
+        ("Makulatur:", str(random.randint(0, 200))),
+    ]
+    for label, value in meta:
+        pdf.cell(0, 5, f"  {label:<18} {value}", ln=True)
+    pdf.ln(3)
+
+    # ── Table header ──
+    pdf.set_font("Courier", "B", 9)
+    pdf.cell(0, 5, "-" * 72, ln=True)
+    header_line = f"  {'Salgskanal':<15} {'Prisgruppe':<12} {'Sats':<10} {'Antal':>8} {'Prisgrundlag':>14} {'Royalty':>12}"
+    pdf.cell(0, 5, header_line, ln=True)
+    pdf.cell(0, 5, "-" * 72, ln=True)
+
+    # ── Table rows ──
+    pdf.set_font("Courier", "", 9)
     total_royalty = 0.0
     for row in rows:
         if row["TRANSTYPE"] not in ("Salg", "Retur", "Frieksp", "Korrektion"):
@@ -435,27 +457,30 @@ def _write_pseudo_pdf(rows: list[dict], path: Path):
         except (ValueError, TypeError):
             royalty = 0.0
         total_royalty += royalty
+        pdf.cell(0, 5, f"  {kanal:<15} {pris:<12} {sats_display:<10} {qty:>8} {prisgrundlag:>14,.2f} {royalty:>12,.2f}", ln=True)
 
-        lines.append(f"  {kanal:<15} {pris:<12} {sats_display:<10} {qty:>8} {prisgrundlag:>14,.2f} {royalty:>12,.2f}")
+    pdf.set_font("Courier", "B", 9)
+    pdf.cell(0, 5, "-" * 72, ln=True)
+    pdf.ln(3)
 
-    lines.append("-" * 80)
-    
+    # ── Summary ──
     fordeling_pct = round(random.uniform(0.5, 1.0), 2)
     fordeling_amount = round(total_royalty * fordeling_pct, 2)
     rest_garanti = round(random.uniform(-5000, 0), 2) if random.random() < 0.3 else 0.0
     afgift = round(random.uniform(-1000, 0), 2) if random.random() < 0.2 else 0.0
     til_udbetaling = round(fordeling_amount + rest_garanti - afgift, 2)
 
-    lines.append("")
-    lines.append(f"  Royalty fordeling: {fordeling_pct*100:.0f}% af {total_royalty:,.2f} → {fordeling_amount:,.2f}")
-    lines.append(f"  Rest global garanti: {rest_garanti:,.2f}")
-    lines.append(f"  Afgift: {afgift:,.2f}")
-    lines.append(f"  Til udbetaling: {til_udbetaling:,.2f}")
-    lines.append("")
-    lines.append("=" * 80)
+    pdf.set_font("Courier", "", 10)
+    pdf.cell(0, 6, f"  Royalty fordeling: {fordeling_pct*100:.0f}% af {total_royalty:,.2f} -> {fordeling_amount:,.2f}", ln=True)
+    pdf.cell(0, 6, f"  Rest global garanti: {rest_garanti:,.2f}", ln=True)
+    pdf.cell(0, 6, f"  Afgift: {afgift:,.2f}", ln=True)
+    pdf.set_font("Courier", "B", 10)
+    pdf.cell(0, 6, f"  Til udbetaling: {til_udbetaling:,.2f}", ln=True)
+    pdf.ln(2)
+    pdf.set_font("Courier", "B", 11)
+    pdf.cell(0, 6, "=" * 72, ln=True)
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+    pdf.output(str(path))
 
 
 # ── Naming helpers ───────────────────────────────────────────────────────────
