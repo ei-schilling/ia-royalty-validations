@@ -2,7 +2,18 @@
 
 import { useState } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { BookOpenCheck, LogOut, History, Upload, Shield, ChevronRight, Bot } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+import {
+  BookOpenCheck,
+  LogOut,
+  History,
+  Upload,
+  Shield,
+  ChevronRight,
+  Bot,
+  Menu,
+  X,
+} from 'lucide-react'
 import { useAuth } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import HistorySheet from '@/components/HistorySheet'
@@ -14,6 +25,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   function handleLogout() {
     logout()
@@ -35,7 +47,12 @@ export default function Layout() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl backdrop-saturate-150">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 h-14">
+        <div
+          className={cn(
+            'mx-auto flex items-center justify-between px-4 sm:px-6 h-14',
+            isFullWidth ? 'max-w-full' : 'max-w-6xl',
+          )}
+        >
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
@@ -56,6 +73,16 @@ export default function Layout() {
           <div className="flex items-center gap-1">
             {user && (
               <>
+                {/* Mobile menu toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="sm:hidden text-muted-foreground"
+                >
+                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </Button>
+
                 {/* Breadcrumb nav */}
                 <nav className="hidden sm:flex items-center mr-4 text-xs text-muted-foreground">
                   <Link
@@ -132,16 +159,78 @@ export default function Layout() {
         </div>
       </header>
 
+      {/* Mobile menu dropdown */}
+      <AnimatePresence>
+        {mobileMenuOpen && user && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="sm:hidden border-b border-border/50 bg-background/95 backdrop-blur-xl overflow-hidden z-40"
+          >
+            <nav className="flex flex-col px-4 py-2 gap-1">
+              <Link
+                to="/upload"
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition-colors',
+                  isUpload
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                )}
+              >
+                <Upload className="h-4 w-4" />
+                Upload
+              </Link>
+              <Link
+                to="/help"
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition-colors',
+                  isHelp
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                )}
+              >
+                <Bot className="h-4 w-4" />
+                Help
+              </Link>
+              <button
+                onClick={() => {
+                  setHistoryOpen(true)
+                  setMobileMenuOpen(false)
+                }}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left"
+              >
+                <History className="h-4 w-4" />
+                History
+              </button>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Content */}
       <main
-        className={cn('flex-1 w-full px-6 py-8', isFullWidth ? 'max-w-full' : 'mx-auto max-w-6xl')}
+        className={cn(
+          'flex-1 w-full',
+          isFullWidth
+            ? 'max-w-full px-4 sm:px-6 py-2 sm:py-3 overflow-hidden'
+            : 'mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8',
+        )}
       >
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 py-5">
-        <div className="mx-auto max-w-6xl px-6 flex items-center justify-between">
+      <footer className={cn('border-t border-border/50', isFullWidth ? 'py-2' : 'py-5')}>
+        <div
+          className={cn(
+            'mx-auto px-4 sm:px-6 flex items-center justify-between',
+            isFullWidth ? 'max-w-full' : 'max-w-6xl',
+          )}
+        >
           <div className="flex items-center gap-2">
             <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground/50" />
             <span className="text-xs text-muted-foreground/70">Royalty Statement Validator</span>

@@ -18,6 +18,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install system tools for archive extraction
+RUN apt-get update && apt-get install -y --no-install-recommends unrar-free && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user
 RUN groupadd -r validator && useradd -r -g validator validator
 

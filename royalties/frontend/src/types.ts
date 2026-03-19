@@ -84,3 +84,15 @@ export interface UploadHistoryItem {
   uploaded_at: string
   validations: ValidationRunBrief[]
 }
+
+// Re-export batch upload types from the feature module
+export type {
+  BatchFile,
+  FileStatus,
+  FileFormat,
+  BatchPhase,
+  ProgressEvent,
+  FileSummary,
+  BatchUploadResponse,
+  BatchValidationStarted,
+} from './features/uploads/types'

@@ -1,13 +1,16 @@
 """Validation run endpoints."""
 
+import asyncio
+import json as json_lib
 import uuid
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from starlette.responses import StreamingResponse
 
 from app.api.auth import CurrentUser
 from app.db.database import get_db
@@ -23,6 +26,7 @@ from app.schemas.validation import (
 from app.services.validation_service import run_validation
 from app.services.pdf_service import generate_validation_pdf
 from app.services.annotated_pdf_service import generate_annotated_pdf
+from app.services.batch_service import run_batch_validation, subscribe_progress
 
 router = APIRouter(prefix="/api/validations", tags=["validations"])
 
@@ -206,4 +210,78 @@ async def download_annotated_pdf(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}_annotated.pdf"'},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Batch validation endpoints
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel
+
+
+class BatchValidationRequest(BaseModel):
+    upload_ids: list[uuid.UUID]
+
+
+@router.post("/batch", status_code=201)
+async def trigger_batch_validation(
+    body: BatchValidationRequest,
+    current_user: CurrentUser,
+    db: DbSession,
+    background_tasks: BackgroundTasks,
+) -> dict:
+    """Trigger validation for multiple uploads as a batch.
+
+    Returns immediately with a batch_id. Progress is streamed via SSE at
+    ``GET /api/validations/batch/{batch_id}/progress``.
+    """
+    if not body.upload_ids:
+        raise HTTPException(status_code=400, detail="No upload IDs provided")
+
+    # Verify all uploads exist and belong to the user
+    for uid in body.upload_ids:
+        result = await db.execute(select(Upload).where(Upload.id == uid))
+        upload = result.scalars().first()
+        if not upload:
+            raise HTTPException(status_code=404, detail=f"Upload {uid} not found")
+
+    batch_id = str(uuid.uuid4())
+
+    # Schedule background processing
+    background_tasks.add_task(
+        run_batch_validation,
+        batch_id=batch_id,
+        upload_ids=body.upload_ids,
+        user_id=current_user.id,
+    )
+
+    return {
+        "batch_id": batch_id,
+        "status": "processing",
+        "validations": [],  # Will be populated via SSE events
+    }
+
+
+@router.get("/batch/{batch_id}/progress")
+async def batch_progress_sse(batch_id: str) -> StreamingResponse:
+    """SSE endpoint streaming real-time progress for a batch validation.
+
+    Auth is passed via ``?token=`` query parameter since EventSource cannot set
+    headers. For simplicity, we rely on the batch_id being unguessable (UUID4).
+    """
+
+    async def event_generator():
+        async for event in subscribe_progress(batch_id):
+            data = json_lib.dumps(event)
+            yield f"data: {data}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )

@@ -85,6 +85,76 @@
   }
 }
 
+/* ─── Custom scrollbars ──────────────────────────────── */
+
+/* Global: use thin scrollbar with themed colors */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: oklch(0.35 0.01 280 / 40%) transparent;
+}
+
+.dark * {
+  scrollbar-color: oklch(0.45 0.02 280 / 35%) transparent;
+}
+
+/* Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0.01 280 / 25%);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.01 280 / 50%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: oklch(0.5 0.01 280 / 65%);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0.02 280 / 20%);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.7 0.02 280 / 40%);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: oklch(0.7 0.02 280 / 55%);
+}
+
+/* Utility: completely hide scrollbar but keep scrolling */
+@layer utilities {
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gutter-stable: reserve scrollbar space to prevent layout shift */
+  .scrollbar-gutter-stable {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* ─── Custom utilities ───────────────────────────────── */
 @layer utilities {
   .text-gradient {

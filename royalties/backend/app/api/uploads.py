@@ -5,7 +5,7 @@ import io
 import json
 import uuid
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
@@ -19,6 +19,7 @@ from app.db.database import get_db
 from app.models.upload import Upload
 from app.schemas.upload import UploadHistoryItem, UploadResponse
 from app.services.upload_service import process_upload
+from app.services.archive_service import is_archive, extract_archive
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
@@ -268,3 +269,162 @@ async def get_upload_file(
             "Content-Length": str(len(content)),
         },
     )
+
+
+@router.post("/batch", status_code=201)
+async def upload_batch(
+    files: List[UploadFile],
+    current_user: CurrentUser,
+    db: DbSession,
+) -> JSONResponse:
+    """Upload multiple files in a single batch request.
+
+    Supports compressed archives (zip, tar, tar.gz, rar). Each archive is
+    extracted and its inner files are processed individually.
+    Returns a batch_id and the list of created Upload records.
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    # Increase max size for archives (200 MB)
+    archive_max = 200 * 1024 * 1024
+
+    batch_id = str(uuid.uuid4())
+    uploads: list[dict] = []
+    upload_dir = Path(settings.upload_dir)
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    for file in files:
+        if not file.filename:
+            continue
+
+        ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+
+        # Handle .tar.gz — detect double extension
+        if ext == "gz" and file.filename.lower().endswith((".tar.gz", ".tgz")):
+            ext = "gz"  # archive_service handles tar.gz via the gz extension
+
+        if ext not in ALLOWED:
+            uploads.append({
+                "upload_id": None,
+                "filename": file.filename,
+                "file_format": ext,
+                "row_count": None,
+                "status": "rejected",
+                "uploaded_at": None,
+                "error": f"File type '{ext}' not allowed",
+            })
+            continue
+
+        file_content = await file.read()
+        size_limit = archive_max if is_archive(ext) else MAX_BYTES
+        if len(file_content) > size_limit:
+            limit_mb = size_limit // (1024 * 1024)
+            uploads.append({
+                "upload_id": None,
+                "filename": file.filename,
+                "file_format": ext,
+                "row_count": None,
+                "status": "rejected",
+                "uploaded_at": None,
+                "error": f"File exceeds {limit_mb}MB limit",
+            })
+            continue
+
+        if is_archive(ext):
+            # Save archive to a temp location, extract, process each inner file
+            archive_id = uuid.uuid4()
+            archive_stored = upload_dir / f"{archive_id}.{ext}"
+            archive_stored.write_bytes(file_content)
+
+            try:
+                extracted = extract_archive(archive_stored, ext, upload_dir)
+            except Exception as exc:
+                uploads.append({
+                    "upload_id": None,
+                    "filename": file.filename,
+                    "file_format": ext,
+                    "row_count": None,
+                    "status": "rejected",
+                    "uploaded_at": None,
+                    "error": f"Failed to extract archive: {exc}",
+                })
+                # Clean up archive file
+                archive_stored.unlink(missing_ok=True)
+                continue
+
+            # Clean up archive file after extraction
+            archive_stored.unlink(missing_ok=True)
+
+            if not extracted:
+                uploads.append({
+                    "upload_id": None,
+                    "filename": file.filename,
+                    "file_format": ext,
+                    "row_count": None,
+                    "status": "rejected",
+                    "uploaded_at": None,
+                    "error": "Archive contains no supported files (csv, xlsx, json, pdf)",
+                })
+                continue
+
+            # Create an Upload record for each extracted file
+            for item in extracted:
+                inner_path = Path(item["stored_path"])
+                inner_ext = item["file_format"]
+                inner_id = item["file_id"]
+                original_name = item["original_name"]
+
+                row_count = await process_upload(inner_path, inner_ext)
+
+                upload_record = Upload(
+                    id=inner_id,
+                    user_id=current_user.id,
+                    filename=original_name,
+                    file_path=str(inner_path),
+                    file_format=inner_ext,
+                    row_count=row_count,
+                )
+                db.add(upload_record)
+                await db.flush()
+                await db.refresh(upload_record)
+
+                uploads.append({
+                    "upload_id": str(upload_record.id),
+                    "filename": upload_record.filename,
+                    "file_format": upload_record.file_format,
+                    "row_count": upload_record.row_count,
+                    "status": "uploaded",
+                    "uploaded_at": upload_record.uploaded_at.isoformat(),
+                })
+        else:
+            # Normal file — same as before
+            file_id = uuid.uuid4()
+            stored_name = f"{file_id}.{ext}"
+            stored_path = upload_dir / stored_name
+            stored_path.write_bytes(file_content)
+
+            row_count = await process_upload(stored_path, ext)
+
+            upload_record = Upload(
+                id=file_id,
+                user_id=current_user.id,
+                filename=file.filename,
+                file_path=str(stored_path),
+                file_format=ext,
+                row_count=row_count,
+            )
+            db.add(upload_record)
+            await db.flush()
+            await db.refresh(upload_record)
+
+            uploads.append({
+                "upload_id": str(upload_record.id),
+                "filename": upload_record.filename,
+                "file_format": upload_record.file_format,
+                "row_count": upload_record.row_count,
+                "status": "uploaded",
+                "uploaded_at": upload_record.uploaded_at.isoformat(),
+            })
+
+    return JSONResponse({"batch_id": batch_id, "uploads": uploads})

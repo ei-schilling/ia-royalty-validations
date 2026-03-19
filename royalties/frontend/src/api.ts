@@ -145,3 +145,10 @@ export async function downloadAnnotatedPdf(validationId: string) {
   a.remove()
   URL.revokeObjectURL(url)
 }
+
+// Re-export batch upload API from feature module for backward compatibility
+export {
+  uploadBatch,
+  triggerBatchValidation,
+  subscribeBatchProgress,
+} from './features/uploads/api/upload-api'

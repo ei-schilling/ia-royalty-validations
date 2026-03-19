@@ -1,6 +1,6 @@
 /** Validation results — rich dashboard with animated metrics. */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import {
@@ -10,8 +10,8 @@ import {
   CheckCircle2,
   Upload,
   Shield,
-  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Rows3,
   Hash,
   Target,
@@ -23,6 +23,7 @@ import {
   PanelRightClose,
   FileText,
   MessageSquare,
+  MoreHorizontal,
 } from 'lucide-react'
 import { getValidation, downloadValidationPdf, downloadAnnotatedPdf } from '@/api'
 import type { ValidationRunResponse, ValidationIssueSummary } from '@/types'
@@ -151,6 +152,9 @@ export default function ResultsPage() {
   const [panelTab, setPanelTab] = useState<'preview' | 'chat'>('preview')
   const [docContent, setDocContent] = useState('')
   const [docFilename, setDocFilename] = useState('')
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const leftPanelRef = useRef<HTMLDivElement>(null)
+  const hasAnimated = useRef(false)
 
   const handleContentLoaded = useCallback((content: string, filename: string) => {
     setDocContent(content)
@@ -210,25 +214,82 @@ export default function ResultsPage() {
   const passedRules = ALL_RULES.filter((r) => !errorRuleIds.has(r.rule_id))
 
   return (
-    <div className="flex gap-0 h-[calc(100vh-8rem)] -my-2">
-      {/* ── Left: Validation Results (40%) ── */}
+    <div className="flex flex-col lg:flex-row gap-0 h-full">
+      {/* Mobile panel toggle bar — shows when panel is available but stacked */}
+      <div className="flex lg:hidden items-center gap-1 border-b border-border/50 -mx-4 sm:-mx-6 px-4 shrink-0">
+        <button
+          onClick={() => {
+            setPanelOpen(false)
+            setPanelTab('preview')
+          }}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2',
+            !panelOpen
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <Shield className="h-3.5 w-3.5" />
+          Results
+        </button>
+        <button
+          onClick={() => {
+            setPanelOpen(true)
+            setPanelTab('preview')
+          }}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2',
+            panelOpen && panelTab === 'preview'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Preview
+        </button>
+        <button
+          onClick={() => {
+            setPanelOpen(true)
+            setPanelTab('chat')
+          }}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2',
+            panelOpen && panelTab === 'chat'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          AI Chat
+        </button>
+      </div>
+
+      {/* ── Left: Validation Results ── */}
       <motion.div
+        ref={leftPanelRef}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        onScroll={(e) => {
+          const target = e.currentTarget
+          setShowScrollTop(target.scrollTop > 300)
+        }}
         className={cn(
-          'space-y-8 overflow-y-auto pr-4 transition-all duration-300',
-          panelOpen ? 'w-[40%] shrink-0 min-w-0' : 'flex-1',
+          'relative space-y-6 lg:space-y-8 pb-6 overflow-y-auto lg:pr-4 transition-all duration-300 scrollbar-gutter-stable',
+          // On mobile: full width, hidden when panel is open
+          panelOpen ? 'hidden lg:block' : 'flex-1',
+          // On desktop: 40% or full width
+          panelOpen ? 'lg:w-[40%] lg:shrink-0 lg:min-w-0' : 'lg:flex-1',
         )}
       >
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2.5">
-              <Shield className="h-6 w-6 text-primary" />
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
               Validation Results
             </h1>
-            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-md">
               Your file was checked against {summary.rules_executed} validation rules across{' '}
               {summary.total_rows} rows.
             </p>
@@ -254,7 +315,7 @@ export default function ResultsPage() {
                 {downloading || downloadingAnnotated ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
-                  <ChevronDown className="h-3.5 w-3.5" />
+                  <MoreHorizontal className="h-3.5 w-3.5" />
                 )}
                 {downloading ? 'Generating…' : downloadingAnnotated ? 'Generating…' : 'Actions'}
               </Button>
@@ -304,18 +365,23 @@ export default function ResultsPage() {
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-5 gap-3">
+        <div
+          className={cn(
+            'grid gap-2 sm:gap-3',
+            panelOpen ? 'grid-cols-3' : 'grid-cols-3 sm:grid-cols-5',
+          )}
+        >
           {/* Pass rate */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.5 }}
             className={cn(
-              'rounded-xl border p-4 flex flex-col items-center justify-center gap-2',
+              'rounded-xl border p-3 sm:p-4 flex flex-col items-center justify-center gap-1.5 sm:gap-2 row-span-2 sm:row-span-1',
               hasIssues ? 'border-border/50 bg-card' : 'border-emerald-500/20 bg-emerald-500/5',
             )}
           >
-            <div className="relative w-16 h-16">
+            <div className="relative w-12 h-12 sm:w-16 sm:h-16">
               <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                 <circle
                   cx="50"
@@ -335,13 +401,20 @@ export default function ResultsPage() {
                   strokeLinecap="round"
                   className={hasIssues ? 'text-primary' : 'text-emerald-400'}
                   strokeDasharray={`${2 * Math.PI * 42}`}
-                  initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                  initial={hasAnimated.current ? false : { strokeDashoffset: 2 * Math.PI * 42 }}
                   animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - passRate / 100) }}
-                  transition={{ delay: 0.3, duration: 1, ease: 'easeOut' }}
+                  transition={
+                    hasAnimated.current
+                      ? { duration: 0 }
+                      : { delay: 0.3, duration: 1, ease: 'easeOut' }
+                  }
+                  onAnimationComplete={() => {
+                    hasAnimated.current = true
+                  }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-display text-lg font-bold text-foreground leading-none">
+                <span className="font-display text-base sm:text-lg font-bold text-foreground leading-none">
                   {passRate}%
                 </span>
               </div>
@@ -453,7 +526,7 @@ export default function ResultsPage() {
             >
               {passedRules.length}
             </Badge>
-            <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">
+            <span className="text-xs text-muted-foreground ml-1 hidden md:inline truncate">
               — Rules that found no critical issues
             </span>
           </button>
@@ -507,6 +580,23 @@ export default function ResultsPage() {
             </p>
           </motion.div>
         )}
+
+        {/* Scroll-to-top button */}
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="sticky bottom-3 ml-auto mr-2 z-10 flex items-center justify-center w-8 h-8 rounded-full border border-border/50 bg-card/90 backdrop-blur-sm shadow-lg text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              aria-label="Scroll to top"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* ── Right Panel: Document Preview + Chat ── */}
@@ -517,10 +607,10 @@ export default function ResultsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="flex-1 border-l border-border/50 flex flex-col h-full overflow-hidden bg-card/30"
+            className="flex-1 lg:border-l border-border/50 flex flex-col h-full overflow-hidden bg-card/30"
           >
-            {/* Panel tabs */}
-            <div className="flex items-center border-b border-border/50 shrink-0">
+            {/* Panel tabs — desktop only (mobile uses top bar) */}
+            <div className="hidden lg:flex items-center border-b border-border/50 shrink-0">
               <button
                 onClick={() => setPanelTab('preview')}
                 className={cn(
@@ -584,13 +674,13 @@ export default function ResultsPage() {
         )}
       </AnimatePresence>
 
-      {/* Panel toggle button (when closed) */}
+      {/* Panel toggle button (when closed) — desktop only */}
       {!panelOpen && data && (
         <motion.button
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => setPanelOpen(true)}
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex items-center gap-1.5 px-2 py-3 rounded-lg border border-border/50 bg-card shadow-lg text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+          className="hidden lg:flex fixed right-4 top-1/2 -translate-y-1/2 z-30 items-center gap-1.5 px-2 py-3 rounded-lg border border-border/50 bg-card shadow-lg text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
           title="Open document panel"
         >
           <PanelRightOpen className="h-4 w-4" />
@@ -644,7 +734,7 @@ function IssueSection({
         <Badge variant="secondary" className={cn('font-mono text-[10px]', config.badgeBg)}>
           {issues.length}
         </Badge>
-        <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">
+        <span className="text-xs text-muted-foreground ml-1 hidden md:inline truncate">
           — {config.subtitle}
         </span>
       </button>
@@ -740,19 +830,41 @@ function MetricCard({
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
       className={cn(
-        'rounded-xl border p-4 flex flex-col items-center text-center transition-all duration-200',
-        onClick && 'cursor-pointer hover:border-primary/30',
+        'rounded-xl border p-3 sm:p-4 flex flex-col items-center text-center transition-all duration-200',
+        onClick &&
+          'cursor-pointer hover:border-primary/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none',
         active
           ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
           : 'border-border/50 bg-card',
       )}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
     >
-      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-3', bg)}>
-        <Icon className={cn('h-4 w-4', color)} />
+      <div
+        className={cn(
+          'w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 sm:mb-3',
+          bg,
+        )}
+      >
+        <Icon className={cn('h-3.5 w-3.5 sm:h-4 sm:w-4', color)} />
       </div>
-      <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
-      <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
-      <p className="text-[10px] text-muted-foreground/50 mt-0.5">{subtitle}</p>
+      <p className="font-display text-xl sm:text-2xl font-bold text-foreground leading-none">
+        {value}
+      </p>
+      <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 sm:mt-1.5 truncate w-full">
+        {label}
+      </p>
+      <p className="text-[10px] text-muted-foreground/50 mt-0.5 truncate w-full">{subtitle}</p>
     </motion.div>
   )
 }
@@ -784,8 +896,10 @@ function IssueCard({
       <div className="flex gap-3">
         <div className={cn('w-1 self-stretch rounded-full shrink-0', config.bg)} />
         <div className="flex-1 min-w-0 space-y-1.5">
-          <p className="text-sm text-foreground leading-relaxed">{issue.message}</p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <p className="text-xs sm:text-sm text-foreground leading-relaxed break-words">
+            {issue.message}
+          </p>
+          <div className="grid grid-cols-[auto_auto] sm:flex sm:flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {issue.row_number != null && (
               <span className="flex items-center gap-1">
                 <Rows3 className="h-3 w-3 text-muted-foreground/50" />
