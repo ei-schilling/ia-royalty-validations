@@ -160,9 +160,7 @@ export function ChatMessage({
           )}
 
           {/* Error indicator in meta row (streaming handled by inline cursor) */}
-          {status === 'error' && (
-            <AlertCircle className="h-2.5 w-2.5 text-destructive" />
-          )}
+          {status === 'error' && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
 
           {/* Retry button for errors */}
           {isError && onRetry && (
