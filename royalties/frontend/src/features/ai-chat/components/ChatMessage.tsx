@@ -1,7 +1,7 @@
 /** ChatMessage — renders a single chat message with avatar, timestamps, status, and actions. */
 
 import { motion } from 'motion/react'
-import { Bot, User, Clock, AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
+import { Bot, User, Clock, AlertCircle, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChatMarkdown } from './ChatMarkdown'
 import { ChatMessageActions } from './ChatMessageActions'
@@ -15,16 +15,17 @@ function formatTime(ts?: string | number): string | null {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-function StatusDot({ status }: { status?: MessageStatus }) {
-  if (!status || status === 'done') return null
+/** Inline blinking cursor shown at the end of streaming content */
+function StreamingCursor({ compact }: { compact?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[10px]">
-      {status === 'streaming' && <Loader2 className="h-2.5 w-2.5 animate-spin text-primary" />}
-      {status === 'sending' && (
-        <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground" />
+    <motion.span
+      className={cn(
+        'inline-block bg-primary rounded-[1px] translate-y-[1px]',
+        compact ? 'w-[2px] h-[14px] ml-0.5' : 'w-[2px] h-[16px] ml-0.5',
       )}
-      {status === 'error' && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
-    </span>
+      animate={{ opacity: [1, 0] }}
+      transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+    />
   )
 }
 
@@ -122,6 +123,7 @@ export function ChatMessage({
           ) : (
             <div className="text-foreground/90">
               <ChatMarkdown content={content} variant={variant} />
+              {status === 'streaming' && <StreamingCursor compact={isCompact} />}
             </div>
           )}
 
@@ -157,7 +159,10 @@ export function ChatMessage({
             </span>
           )}
 
-          <StatusDot status={status} />
+          {/* Error indicator in meta row (streaming handled by inline cursor) */}
+          {status === 'error' && (
+            <AlertCircle className="h-2.5 w-2.5 text-destructive" />
+          )}
 
           {/* Retry button for errors */}
           {isError && onRetry && (

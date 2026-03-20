@@ -20,11 +20,18 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://validator:validator@db:5432/validator
       UPLOAD_DIR: /app/uploads
-      CORS_ORIGINS: '["http://localhost:5173","http://localhost"]'
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost","http://localhost:3000"]'
       DMR_BASE: http://model-runner.docker.internal/engines/llama.cpp/v1
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SCHILLING_USERNAME: ${SCHILLING_USERNAME:-schilling}
+      SCHILLING_PASSWORD: ${SCHILLING_PASSWORD:-schilling}
     ports:
       - "8000:8000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    extra_hosts:
+      - "sch-test.local.schilling.dk:10.20.10.5"
     depends_on:
       db:
         condition: service_healthy

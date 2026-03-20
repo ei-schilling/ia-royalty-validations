@@ -309,8 +309,6 @@ async def _stream_sse(messages: list[dict], mode: str = "query") -> AsyncGenerat
     if not got_content:
         log.warning("Primary (OpenAI) failed: %s — trying local fallback", primary_error)
 
-        yield f"data: {json.dumps({'type': 'TEXT_MESSAGE_CONTENT', 'messageId': msg_id, 'delta': '\n\n---\n\n> _Using local model (OpenAI unavailable)_\n\n'})}\n\n"
-
         fb_got_content = False
         fb_error: str | None = None
 

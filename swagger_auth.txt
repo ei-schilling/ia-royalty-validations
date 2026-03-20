@@ -1,0 +1,98 @@
+POST   /ws/authenticate/ChangePassword
+       -> Post_schilling::webservice::Authenticate::ChangePassword()
+       param: None (None) - 
+GET    /ws/authenticate/Environments
+       -> Post_schilling::webservice::Authenticate::Environments()
+       param: None (None) - 
+POST   /ws/authenticate/Login
+       param: None (None) - 
+POST   /ws/authenticate/Logout
+       -> Post_schilling::webservice::Authenticate::Logout()
+       param: None (None) - 
+GET    /ws/authenticate/MSLoginInfo
+       param: None (None) - 
+POST   /ws/authenticate/MSTokenLogin
+       param: None (None) - 
+GET    /ws/authenticate/SSOLogin
+       param: None (None) - 
+POST   /ws/authenticate/SaltedLogin
+       param: None (None) - 
+POST   /ws/authenticate/TokenLogin
+       param: None (None) - 
+GET    /ws/authenticate/company/Get
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/authenticate/company/GetInstalled
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/authenticate/company/SupportedISOLanguages
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/authenticate/session/GetLoginToken
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/{company}/schilling/royalty/RoyAuthor
+       -> Get RoyAuthor records
+       param: filter (query) - [Simple filter](parameters.html#filter)
+       param: $filter (query) - [OData filter](parameters.html#filter)
+       param: preFilter (query) - [Predefined filters](parameters.html#filter)
+       param: preGrouping (query) - [Predefined groupings](parameters.html#grouping)
+       param: sort (query) - [Sort](parameters.html#sort)
+       param: grouping (query) - [Grouping](parameters.html#grouping)
+       param: having (query) - [Having](parameters.html#having)
+       param: columns (query) - [Columns](parameters.html#columns)
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: changes (query) - Return the change log (1 = yes)
+PUT    /ws/{company}/schilling/royalty/RoyAuthor
+       -> Get RoyAuthor records
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/{company}/schilling/royalty/RoyAuthor/$meta
+       -> Get extra information about the webservice such as supported predefined filters and searchable fields
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/{company}/schilling/royalty/RoyAuthor/$prefilled
+       -> Get a prefilled RoyAuthor record.
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+POST   /ws/{company}/schilling/royalty/RoyAuthor/$search
+       -> Search RoyAuthor records
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+POST   /ws/{company}/schilling/royalty/RoyAuthor/GetUniqueValues
+       -> Get distinct values used on a property/column
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/{company}/schilling/royalty/RoyAuthor/{Id}
+       -> Fetch one RoyAuthor record
+       param: Id (path) - System assigned unique identifier
+       param: columns (query) - [Columns](parameters.html#columns)
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+GET    /ws/{company}/schilling/royalty/RoyAuthor/{Id}/GetCRNLogged
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: Id (path) - 
+GET    /ws/{company}/schilling/standard/GoogleAuthenticator/Get
+       -> Post_schilling::standard::GoogleAuthenticator::Get()
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+POST   /ws/{company}/schilling/standard/Relation/{Id}/GetAuthorName
+       -> Post_schilling::standard::Relation::GetAuthorName()
+       param: None (None) - 
+       param: None (None) - 
+       param: None (None) - 
+       param: Id (path) - 

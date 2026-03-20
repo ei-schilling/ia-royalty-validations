@@ -1,0 +1,91 @@
+
+============================================================
+POST /ws/authenticate/ChangePassword
+Summary: N/A
+OperationId: Post_schilling::webservice::Authenticate::ChangePassword()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/Environments
+Summary: N/A
+OperationId: Post_schilling::webservice::Authenticate::Environments()
+Parameters:
+Response 200: Ok
+
+============================================================
+POST /ws/authenticate/Login
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::Login()
+Parameters:
+Response 200: Ok
+
+============================================================
+POST /ws/authenticate/Logout
+Summary: N/A
+OperationId: Post_schilling::webservice::Authenticate::Logout()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/MSLoginInfo
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::MSLoginInfo()
+Parameters:
+Response 200: Ok
+
+============================================================
+POST /ws/authenticate/MSTokenLogin
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::MSTokenLogin()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/SSOLogin
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::SSOLogin()
+Parameters:
+Response 200: Ok
+
+============================================================
+POST /ws/authenticate/SaltedLogin
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::SaltedLogin()
+Parameters:
+Response 200: Ok
+
+============================================================
+POST /ws/authenticate/TokenLogin
+Summary: 
+OperationId: Post_schilling::webservice::Authenticate::TokenLogin()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/company/Get
+Summary: 
+OperationId: Post_schilling::webservice::Company::Get()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/company/GetInstalled
+Summary: 
+OperationId: Post_schilling::webservice::Company::GetInstalled()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/company/SupportedISOLanguages
+Summary: 
+OperationId: Post_schilling::webservice::Company::SupportedISOLanguages()
+Parameters:
+Response 200: Ok
+
+============================================================
+GET /ws/authenticate/session/GetLoginToken
+Summary: 
+OperationId: Post_schilling::webservice::Session::GetLoginToken()
+Parameters:
+Response 200: Ok

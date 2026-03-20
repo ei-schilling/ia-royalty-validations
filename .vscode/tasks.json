@@ -305,6 +305,56 @@
 				"-File",
 				"C:\\Users\\ei\\Projects\\royaltyStatementValidator\\git_push.ps1"
 			]
+		},
+		{
+			"label": "Rebuild Chat UI",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker compose up --build -d backend frontend 2>&1; Write-Host '=== REBUILD DONE ==='"
+			]
+		},
+		{
+			"label": "Check Build & Logs",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Write-Host '=== FRONTEND ASSETS ==='; docker exec royalties-frontend-1 ls /usr/share/nginx/html/assets/ 2>&1; Write-Host '=== BACKEND LOGS (last 15) ==='; docker logs royalties-backend-1 --tail 15 2>&1; Write-Host '=== DONE ===';"
+			]
+		},
+		{
+			"label": "Quick Check",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"docker exec royalties-frontend-1 ls /usr/share/nginx/html/assets/ 2>&1; Write-Host '---ASSETS_DONE---'; docker logs royalties-backend-1 --tail 5 2>&1; Write-Host '---LOGS_DONE---'"
+			]
+		},
+		{
+			"label": "Rebuild Backend Auth",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker rm -f royalties-backend-1 2>$null; docker compose up --build -d backend 2>&1 | Select-Object -Last 15; Write-Host '===BUILD_DONE==='"
+			]
+		},
+		{
+			"label": "Rebuild Backend Auth Fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"cd C:\\Users\\ei\\Projects\\royaltyStatementValidator\\royalties; docker rm -f royalties-backend-1 2>$null; docker compose up --build -d backend 2>&1 | Select-Object -Last 15; Write-Host '===BUILD_DONE==='"
+			]
 		}
 	]
 }

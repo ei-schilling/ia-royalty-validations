@@ -1,0 +1,81 @@
+ Image royalties-backend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 601B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.02kB 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 ...
+
+#4 [auth] library/python:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 1.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 139B done
+#5 DONE 0.0s
+
+#6 [builder 1/6] FROM docker.io/library/python:3.12-slim@sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4
+#6 resolve docker.io/library/python:3.12-slim@sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 11.88kB 0.0s done
+#7 DONE 0.0s
+
+#8 [builder 5/6] COPY app/ app/
+#8 CACHED
+
+#9 [stage-1 5/7] COPY --from=builder /app/deps /usr/local/lib/python3.12/site-packages
+#9 CACHED
+
+#10 [stage-1 3/7] RUN apt-get update && apt-get install -y --no-install-recommends unrar-free && rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [stage-1 4/7] RUN groupadd -r validator && useradd -r -g validator validator
+#11 CACHED
+
+#12 [builder 3/6] RUN pip install --no-cache-dir build
+#12 CACHED
+
+#13 [builder 6/6] RUN pip install --no-cache-dir --target=/app/deps .
+#13 CACHED
+
+#14 [builder 4/6] COPY pyproject.toml .
+#14 CACHED
+
+#15 [builder 2/6] WORKDIR /app
+#15 CACHED
+
+#16 [stage-1 6/7] COPY --from=builder /app/app /app/app
+#16 CACHED
+
+#17 [stage-1 7/7] RUN mkdir -p /app/uploads && chown -R validator:validator /app
+#17 CACHED
+
+#18 exporting to image
+#18 exporting layers done
+#18 exporting manifest sha256:2b54f050eff3953bf385e5bd0b09a2dd93f599cb2be660d76dca16729a06b0ba done
+#18 exporting config sha256:877f6d5c89bc0cf09517a23c46b428de8e9577f851d41d0f7226562fa44f9e49 done
+#18 exporting attestation manifest sha256:c5019c68b3e148da51aada19d39480983fdaf0526a1cdca5fa356c26b3182dd7 0.0s done
+#18 exporting manifest list sha256:7486f1fc5c98f7860f5232c26e28f7a8af74a844bd7cbae26bf0903c3a0e6655
+#18 exporting manifest list sha256:7486f1fc5c98f7860f5232c26e28f7a8af74a844bd7cbae26bf0903c3a0e6655 0.0s done
+#18 naming to docker.io/library/royalties-backend:latest done
+#18 unpacking to docker.io/library/royalties-backend:latest done
+#18 DONE 0.1s
+
+#19 resolving provenance for metadata file
+#19 DONE 0.0s
+ Image royalties-backend Built 
+ Container royalties-db-1 Running 
+ Container royalties-backend-1 Recreate 
+ Container royalties-backend-1 Recreated 
+ Container royalties-db-1 Waiting 
+ Container royalties-db-1 Healthy 
+ Container royalties-backend-1 Starting 
+ Container royalties-backend-1 Started 

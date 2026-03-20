@@ -1,0 +1,31 @@
+Fetching https://sch-test.local.schilling.dk/docs/swagger.json ...
+
+Found 14 document-related paths:
+
+  GET    /ws/{company}/schilling/documentmanagement/Document
+         -> Get Document records
+  PUT    /ws/{company}/schilling/documentmanagement/Document
+         -> Get Document records
+  GET    /ws/{company}/schilling/documentmanagement/Document/$meta
+         -> Get extra information about the webservice such as supported predefined filters and searchable fields
+  GET    /ws/{company}/schilling/documentmanagement/Document/$prefilled
+         -> Get a prefilled Document record.
+  POST   /ws/{company}/schilling/documentmanagement/Document/$search
+         -> Search Document records
+  POST   /ws/{company}/schilling/documentmanagement/Document/GetUniqueValues
+         -> Get distinct values used on a property/column
+  POST   /ws/{company}/schilling/documentmanagement/Document/MergePDF
+         ->  Merges the provided documents (by their IDs) into a single PDF and returns it as octet-stream.
+  GET    /ws/{company}/schilling/documentmanagement/Document/{Id}
+         -> Fetch one Document record
+  GET    /ws/{company}/schilling/documentmanagement/Document/{Id}/Download
+         ->  Download a document by ID (Content-Disposition is attachment).
+  POST   /ws/{company}/schilling/documentmanagement/Document/{Id}/GetDocumentContentRest
+  GET    /ws/{company}/schilling/documentmanagement/Document/{Id}/Preview
+         ->  Download a document by ID and preview (Content-Disposition is inline).
+  POST   /ws/{company}/schilling/documentmanagement/DocumentExport/Export
+         -> Export documents according to the given criteria and options.
+  POST   /ws/{company}/schilling/documentmanagement/DocumentExport/GetDocs
+         -> Returns a list of documents with minimal information according to the given criteria.
+  POST   /ws/{company}/schilling/documentmanagement/DocumentExport/GetSize
+         -> Get the number and total size of documents according to the given criteria.

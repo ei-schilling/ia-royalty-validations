@@ -5,7 +5,6 @@ import { AnimatePresence } from 'motion/react'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from './ChatMessage'
 import { ChatShimmer } from './ChatShimmer'
-import { ChatTypingIndicator } from './ChatTypingIndicator'
 import { ChatScrollButton } from './ChatScrollButton'
 import { ChatEmptyState } from './ChatEmptyState'
 import { ChatErrorState } from './ChatErrorState'
@@ -201,8 +200,7 @@ export function ChatConversation({
               {isWaitingForFirstToken && <ChatShimmer variant={variant} />}
             </AnimatePresence>
 
-            {/* Typing indicator: visible while actively streaming content */}
-            {isStreaming && <ChatTypingIndicator variant={variant} />}
+            {/* Typing indicator removed — inline streaming cursor inside ChatMessage handles this */}
 
             {/* Follow-up suggestion chips after last assistant message */}
             {showFollowUps && onSuggestionClick && (

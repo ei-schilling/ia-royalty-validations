@@ -5,13 +5,36 @@ from datetime import datetime
 
 
 from typing import Optional, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ValidationRunRequest(BaseModel):
     """Request body for triggering a validation run."""
 
     rules: list[str] = ["all"]
+
+
+# ---------------------------------------------------------------------------
+# Schilling document validation (external integration)
+# ---------------------------------------------------------------------------
+
+
+class ValidateDocumentRequest(BaseModel):
+    """Request body for single-document validation via Schilling API."""
+
+    document_id: int = Field(..., description="Schilling DocumentId from the recipient row")
+    schilling_token: Optional[str] = Field(None, description="Ignored — backend authenticates directly")
+    company_id: int = Field(..., description="Schilling company ID")
+    schilling_api_url: str = Field(..., min_length=1, description="Schilling API base URL (no trailing slash)")
+
+
+class ValidateBatchRequest(BaseModel):
+    """Request body for batch document validation via Schilling API."""
+
+    document_ids: list[int] = Field(..., min_length=1, description="Array of Schilling DocumentId values")
+    schilling_token: Optional[str] = Field(None, description="Ignored — backend authenticates directly")
+    company_id: int = Field(..., description="Schilling company ID")
+    schilling_api_url: str = Field(..., min_length=1, description="Schilling API base URL (no trailing slash)")
 
 
 class ValidationIssueSummary(BaseModel):

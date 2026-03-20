@@ -1,0 +1,12 @@
+HOST_DNS: sch-test.local.schilling.dk -> 10.20.10.5
+CONTAINER_DNS: sch-test.local.schilling.dk -> 10.20.10.5
+SCHILLING_TEST: HTTP 403
+{
+    "metaData": {
+        "root": "result",
+        "successProperty": "success",
+        "messageProperty": "error"
+    },
+    "success": false,
+    "error": "No access to company",
+    "result": {

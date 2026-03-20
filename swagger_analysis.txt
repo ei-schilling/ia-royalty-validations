@@ -1,0 +1,21 @@
+=== 14 Document paths in Swagger ===
+/ws/{company}/schilling/documentmanagement/Document
+/ws/{company}/schilling/documentmanagement/Document/$meta
+/ws/{company}/schilling/documentmanagement/Document/$prefilled
+/ws/{company}/schilling/documentmanagement/Document/$search
+/ws/{company}/schilling/documentmanagement/Document/GetUniqueValues
+/ws/{company}/schilling/documentmanagement/Document/MergePDF
+/ws/{company}/schilling/documentmanagement/Document/{Id}
+/ws/{company}/schilling/documentmanagement/Document/{Id}/Download
+/ws/{company}/schilling/documentmanagement/Document/{Id}/GetDocumentContentRest
+/ws/{company}/schilling/documentmanagement/Document/{Id}/Preview
+/ws/{company}/schilling/documentmanagement/DocumentExport
+/ws/{company}/schilling/documentmanagement/DocumentExport/Export
+/ws/{company}/schilling/documentmanagement/DocumentExport/GetDocs
+/ws/{company}/schilling/documentmanagement/DocumentExport/GetSize
+
+=== Our service URLs vs Swagger ===
+Our metadata:  {base_url}/schilling/documentmanagement/Document/{id}
+Swagger meta:  /ws/{company}/schilling/documentmanagement/Document/{Id}
+Our download:  {base_url}/schilling/documentmanagement/Document/{id}/Download
+Swagger down:  /ws/{company}/schilling/documentmanagement/Document/{Id}/Download

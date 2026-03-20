@@ -1,0 +1,36 @@
+=== GET https://sch-test.local.schilling.dk/ws/company4/schilling/documentmanagement/Document/22858 ===
+HTTP ERROR: 403
+BODY: {
+    "metaData": {
+        "root": "result",
+        "successProperty": "success",
+        "messageProperty": "error"
+    },
+    "success": false,
+    "error": "No access to company",
+    "result": {
+        "fault": "Schilling Exception",
+        "type": "Forbidden",
+        "explanation": "No access to company",
+        "member": "ValidateAccess"
+    }
+}
+
+
+=== GET https://sch-test.local.schilling.dk/ws/company4/schilling/documentmanagement/Document/22858/Download ===
+HTTP ERROR: 403
+BODY: {
+    "metaData": {
+        "root": "result",
+        "successProperty": "success",
+        "messageProperty": "error"
+    },
+    "success": false,
+    "error": "No access to company",
+    "result": {
+        "fault": "Schilling Exception",
+        "type": "Forbidden",
+        "explanation": "No access to company",
+        "member": "ValidateAccess"
+    }
+}

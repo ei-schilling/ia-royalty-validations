@@ -1,0 +1,43 @@
+=== GET https://sch-test.local.schilling.dk/ws/company1/schilling/documentmanagement/Document/22859 ===
+HTTP ERROR: 403
+BODY: {
+"metaData": {
+"root": "result",
+"successProperty": "success",
+"messageProperty": "error"
+},
+"success": false,
+"error": "Token 000001f4psx42XEfQ8CdDI68yespUw does not exist",
+"result": {
+"fault": "Schilling Exception",
+"type": "NoAccess",
+"explanation": "Token 000001f4psx42XEfQ8CdDI68yespUw does not exist",
+"context": "LoginToken",
+"member": "LookupToken",
+"domain": 0,
+"full": "NoAccessException: Token 000001f4psx42XEfQ8CdDI68yespUw does not exist\nContext: LoginToken\nMember: LookupToken"
+}
+
+}
+
+=== GET https://sch-test.local.schilling.dk/ws/company1/schilling/documentmanagement/Document/22859/Download ===
+HTTP ERROR: 403
+BODY: {
+"metaData": {
+"root": "result",
+"successProperty": "success",
+"messageProperty": "error"
+},
+"success": false,
+"error": "Token 000001f4psx42XEfQ8CdDI68yespUw does not exist",
+"result": {
+"fault": "Schilling Exception",
+"type": "NoAccess",
+"explanation": "Token 000001f4psx42XEfQ8CdDI68yespUw does not exist",
+"context": "LoginToken",
+"member": "LookupToken",
+"domain": 0,
+"full": "NoAccessException: Token 000001f4psx42XEfQ8CdDI68yespUw does not exist\nContext: LoginToken\nMember: LookupToken"
+}
+
+}

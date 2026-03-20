@@ -1,0 +1,7 @@
+HEALTH: 200 {"status":"ok","version":"1.0.0"}
+
+--- Testing validate-document ---
+STATUS: 200
+event: error
+data: {"document_id": 22858, "message": "Schilling API returned HTTP 403", "error_code": "SCHILLING_FETCH_FAILED"}
+

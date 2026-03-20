@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480
 
+    # Schilling ERP credentials for backend-to-Schilling authentication
+    schilling_username: str = ""
+    schilling_password: str = ""
+
     model_config = {"env_prefix": "", "env_file": ".env", "extra": "ignore"}
 
 
