@@ -83,7 +83,12 @@ class DateValidationRule(BaseRule):
 
 
 def _parse_period(period_str: str) -> Optional[Tuple[datetime, datetime]]:
-    """Parse a Schilling period string like '01.01.20-31.12.20'."""
+    """Parse a Schilling period string like '01.01.20-31.12.20'.
+
+    Uses Python's %y directive: two-digit years 00–68 map to 2000–2068,
+    and 69–99 map to 1969–1999. This matches expected Schilling settlement
+    periods (post-1969); historical files from before 1969 are not supported.
+    """
     match = re.match(r"(\d{2}\.\d{2}\.\d{2})-(\d{2}\.\d{2}\.\d{2})", period_str)
     if match:
         try:

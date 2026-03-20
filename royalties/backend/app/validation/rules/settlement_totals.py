@@ -4,7 +4,15 @@ from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 
 
 class SettlementTotalsRule(BaseRule):
-    """Validates the chain: sales lines → subtotal → fordeling → garanti → afgift → payout."""
+    """Validates the chain: sales lines → subtotal → fordeling → garanti → afgift → payout.
+
+    Note on the 'afgift' field in page_summary rows:
+        In PDF page summaries, 'afgift' holds a **percentage** (e.g. 10.0 for 10%).
+        It is used in the payout formula as:
+            afgift_amount = afgift_base * afgift_val / 100.0
+        This is distinct from CSV/JSON rows where transtype == 'afgift' carries a
+        raw currency amount in 'beloeb' (checked by Rule 4: TaxValidationRule).
+    """
 
     @property
     def rule_id(self) -> str:

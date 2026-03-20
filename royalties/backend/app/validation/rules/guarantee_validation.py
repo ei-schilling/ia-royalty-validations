@@ -93,9 +93,12 @@ class GuaranteeValidationRule(BaseRule):
             except (ValueError, TypeError):
                 continue
 
-            if "garanti" in transtype and "mod" not in transtype:
+            # Known guarantee types: garglobal, garlokal, garmetode/garmethod (and *mod)
+            is_guarantee = transtype in ("garglobal", "garlokal", "garmetode", "garmethod")
+            is_offset = transtype in ("garglobalmod", "garlokalmod", "garmetodemod", "garmethodmod")
+            if is_guarantee:
                 guarantees[aftale] = guarantees.get(aftale, 0) + amount
-            elif "garanti" in transtype and "mod" in transtype:
+            elif is_offset:
                 offsets[aftale] = offsets.get(aftale, 0) + amount
 
         for aftale, guar_amount in guarantees.items():

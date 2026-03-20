@@ -6,7 +6,12 @@ from app.validation.base_rule import BaseRule, Severity, ValidationIssue
 from typing import Optional
 
 class RecipientSharesRule(BaseRule):
-    """Validates that recipient percentage shares sum to at most 100%."""
+    """Validates that recipient percentage shares sum to at most 100%.
+
+    Only applicable to PDF data: the 'fordeling_pct' field appears exclusively
+    in PDF page_summary rows. CSV/JSON exports from Schilling do not include
+    per-recipient share columns, so those formats produce no issues here.
+    """
 
     @property
     def rule_id(self) -> str:
