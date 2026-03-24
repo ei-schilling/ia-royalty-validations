@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<SchillingReport>
+<Header>
+<id>XSLRoyAfr3</id>
+<uuid>5f498ae2-e86c-4f0e-b8cf-a81facea0d92</uuid>
+<title>Endelig afregning (Format 3) XML Afr3</title>
+<languagecode>DK</languagecode>
+<wlanguagecode>DK</wlanguagecode>
+<device>document</device>
+<altformid>RoyAfrEnd3</altformid>
+<Company>
+<Company>1</Company>
+<name>Schilling ApS (UFT-8)</name>
+<adr1>Roholmsvej 12F</adr1>
+<adr2>2620 Albertslund</adr2>
+<adr3></adr3>
+<adr4>Danmark</adr4>
+<cvr>27741002</cvr>
+<spcvr></spcvr>
+<impcvr></impcvr>
+<expcvr></expcvr>
+<code></code>
+<foplogo>schilling_logo.svg</foplogo>
+<interest> 2.13</interest>
+<currencycode>DKK</currencycode>
+<OIOname>Schilling ApS</OIOname>
+<OIOaddress1>Roholmsvej 12F</OIOaddress1>
+<OIOaddress2></OIOaddress2>
+<OIOzipcode>2620</OIOzipcode>
+<OIOcity>Albertslund</OIOcity>
+<OIOpaymentid>123</OIOpaymentid>
+<OIOfinaccount>4586904332</OIOfinaccount>
+<OIOregistration>9309</OIOregistration>
+<OIObankname>Amagerbanken</OIObankname>
+<OIOswiftcode>ABBASEXS</OIOswiftcode>
+<OIOaccounttype>BANK</OIOaccounttype>
+<OIOpaymenttype>INDBETALINGSKORT</OIOpaymenttype>
+<OIOtypecodeid>71</OIOtypecodeid>
+<tunean></tunean>
+<phoneno>70279900</phoneno>
+<faxno>70279901</faxno>
+<homepage>www.schilling.dk</homepage>
+<email>schilling@schilling.dk</email>
+<system_iban>123454321</system_iban>
+<post_firmanavn></post_firmanavn>
+<post_adresse1></post_adresse1>
+<post_adresse2></post_adresse2>
+<post_adresse3></post_adresse3>
+<post_adresse4></post_adresse4>
+<besog_firmanavn></besog_firmanavn>
+<besog_adresse1></besog_adresse1>
+<besog_adresse2></besog_adresse2>
+<besog_adresse3></besog_adresse3>
+<besog_adresse4></besog_adresse4>
+</Company>
+<Creator>
+<logname>schilling</logname>
+<fullname>schilling</fullname>
+</Creator>
+<Created>
+<isodatetime>2026-03-20T11:11:44</isodatetime>
+<datetime year="2026" month="03" day="20" hour="11" minute="11" second="44">20 Mar 26</datetime></Created>
+<Receiver>
+<name>C: Johannes B. Hreinsson</name>
+<name2></name2>
+<address1>Baldersbækvej 24-26</address1>
+<address2></address2>
+<address3></address3>
+<zipcode>DK-2635</zipcode>
+<district>Ishøj</district>
+<countryname>Denmark</countryname>
+<countrycode>DK</countrycode>
+<isocountrycode>DK</isocountrycode>
+</Receiver>
+<FormText>
+<formname>Royaltyafregning</formname>
+<royafr.adr.cvrtxt>CVR.:</royafr.adr.cvrtxt>
+<royafr.adr.faxnotxt>Fax.:</royafr.adr.faxnotxt>
+<royafr.adr.phonenotxt>Tlf.:</royafr.adr.phonenotxt>
+<royafr.advance>Resterende forskud:</royafr.advance>
+<royafr.agreement>Aftale:</royafr.agreement>
+<royafr.agree.name>Aftalenavn:</royafr.agree.name>
+<royafr.agree.no>Aftalenr.:</royafr.agree.no>
+<royafr.amount>Bel¿b:</royafr.amount>
+<royafr.anthology>Resterende antologi:</royafr.anthology>
+<royafr.author.no>Kontonr.:</royafr.author.no>
+<royafr.AUTHOR_SUMPAGE_INFO_LINE_2>Ny summeringsside - udskrives ikke</royafr.AUTHOR_SUMPAGE_INFO_LINE_2>
+<royafr.auto.stock>Auto reguleret:</royafr.auto.stock>
+<royafr.balance.adjust.12>Balanceregulering:</royafr.balance.adjust.12>
+<royafr.balance.adjust.13>Balanceregulering:</royafr.balance.adjust.13>
+<royafr.balance.adjust.14>Balanceregulering:</royafr.balance.adjust.14>
+<royafr.bank.name>Bank:</royafr.bank.name>
+<royafr.bank.no>Kontonr:</royafr.bank.no>
+<royafr.bank.swift>SWIFT:</royafr.bank.swift>
+<royafr.basis>Grundlag:</royafr.basis>
+<royafr.basis.cur>Basisvaluta:</royafr.basis.cur>
+<royafr.chan.code>Kode:</royafr.chan.code>
+<royafr.chan.name>Navn:</royafr.chan.name>
+<royafr.code>Kode:</royafr.code>
+<royafr.cur.amount>Valutabel¿b:</royafr.cur.amount>
+<royafr.currency>Valuta:</royafr.currency>
+<royafr.currency.code.home>DKK</royafr.currency.code.home>
+<royafr.currency.unit.home> kr.</royafr.currency.unit.home>
+<royafr.duty>Afgift:</royafr.duty>
+<royafr.exch.rate>Kurs:</royafr.exch.rate>
+<royafr.foplogo>schilling_logo.svg</royafr.foplogo>
+<royafr.for.payment>Til udbetaling:</royafr.for.payment>
+<royafr.free.stock>Frieksemplar:</royafr.free.stock>
+<royafr.guarantee.global>Resterende globalgaranti:</royafr.guarantee.global>
+<royafr.guarantee.local>Resterende garanti:</royafr.guarantee.local>
+<royafr.guarentee.method>Resterende metode garanti:</royafr.guarentee.method>
+<royafr.headline.stock.akk>Ackumulerat</royafr.headline.stock.akk>
+<royafr.headline.stock.per>Periode</royafr.headline.stock.per>
+<royafr.inc.stock>Periodens tilgang:</royafr.inc.stock>
+<royafr.in.hand.stock>Lagerbeholdning:</royafr.in.hand.stock>
+<royafr.last.settlement>Bem¿rk at dette er den sidste afregning p¿ denne aftale</royafr.last.settlement>
+<royafr.loss.stock>Svind</royafr.loss.stock>
+<royafr.maculate.stock>Makuleret:</royafr.maculate.stock>
+<royafr.method.primo>Metode garanti primo:</royafr.method.primo>
+<royafr.method.ultimo>Metode garanti ultimo:</royafr.method.ultimo>
+<royafr.name>Navn:</royafr.name>
+<royafr.no.sold>Antal solgte:</royafr.no.sold>
+<royafr.org.agree.no>Org. aftalenr.:</royafr.org.agree.no>
+<royafr.part.in>Royalty fordeling:</royafr.part.in>
+<royafr.payment>Udbetalt</royafr.payment>
+<royafr.pcs> stk.</royafr.pcs>
+<royafr.percent.of>% af</royafr.percent.of>
+<royafr.prev.settle.stock>Tidligere afregnet:</royafr.prev.settle.stock>
+<royafr.price.basis>Prisgrundlag:</royafr.price.basis>
+<royafr.price.group>Prisgruppe:</royafr.price.group>
+<royafr.primo.stock>Primo lager</royafr.primo.stock>
+<royafr.product.forfnavn>Forfatternavn:</royafr.product.forfnavn>
+<royafr.product.group>Vareprisgruppe:</royafr.product.group>
+<royafr.product.ISBN>ISBN:</royafr.product.ISBN>
+<royafr.product.no>Varenr.:</royafr.product.no>
+<royafr.product.public.date>Udgiv. dato:</royafr.product.public.date>
+<royafr.product.rate>Salgspris:</royafr.product.rate>
+<royafr.product.title>Titel:</royafr.product.title>
+<royafr.rate>Sats:</royafr.rate>
+<royafr.regards>Med venlig hilsen</royafr.regards>
+<royafr.regards.endtxt>UTF-8 - Test at det virker fra tabellen FGTEXT. I tilfælde af spørgsmål til ovenstående, kontakt da venligst undertegnede.</royafr.regards.endtxt>
+<royafr.regards.phonenotxt>Tlf.:</royafr.regards.phonenotxt>
+<royafr.royalty>Royalty:</royafr.royalty>
+<royafr.royalty.rate>Royaltykurs:</royafr.royalty.rate>
+<royafr.sale.period.stock>Periodens salg:</royafr.sale.period.stock>
+<royafr.sales.channel>Salgskanal:</royafr.sales.channel>
+<royafr.send.invoice>Fremsend venligst en faktura</royafr.send.invoice>
+<royafr.settle.no>Afregningsnr.:</royafr.settle.no>
+<royafr.settle.period>Periode:</royafr.settle.period>
+<royafr.sum.arttxt>Titel:</royafr.sum.arttxt>
+<royafr.sum.forfnavn>Forfatternavn:</royafr.sum.forfnavn>
+<royafr.tax>Skat:</royafr.tax>
+<royafr.terms>Vilk¿r:</royafr.terms>
+<royafr.to.date>Til dato:</royafr.to.date>
+<royafr.total>Total</royafr.total>
+<royafr.total.royalty>Total royalty:</royafr.total.royalty>
+<royafr.total.stock>Total oplag:</royafr.total.stock>
+<royafr.trans.next>Til n¿ste afregning:</royafr.trans.next>
+<royafr.trans.next.detention>Tilbageholdt:</royafr.trans.next.detention>
+<royafr.trans.prev>Overført fra tidligere:</royafr.trans.prev>
+<royafr.trans_prev>Overført fra tidligere:</royafr.trans_prev>
+<royafr.trans.prev.detention>Fra tidligere:</royafr.trans.prev.detention>
+<royafr.ultimo.stock>Ultimo lager</royafr.ultimo.stock>
+<royafr.vat>Moms:</royafr.vat>
+<un.accountno>Kundenr.</un.accountno>
+<un.amount>Beløb</un.amount>
+<un.customerno>Customer no.</un.customerno>
+<un.date>Date</un.date>
+<un.duedate>Forfalden</un.duedate>
+<un.invoiceno>Faktura</un.invoiceno>
+<un.page>Side</un.page>
+<un.printed>Udskrevet</un.printed>
+<un.subtotal>Subtotal</un.subtotal>
+<un.text>Tekst</un.text>
+<un.totaldue>Forfalden</un.totaldue>
+</FormText>
+<ReferenceModuleAttributeNames>
+</ReferenceModuleAttributeNames>
+</Header>
+<Body>
+<RoyAfrEnd3>
+<AUTHOR_ORIGINAL_ARRANGEMENT_INFO>
+<ARRANGEMENT_INFO>
+<HEAD_INFO>
+<HEAD_ADRESS>
+<OrgNr>940676-6543</OrgNr><TinNr></TinNr><fgman3/><AdrLin1>C: Johannes B. Hreinsson</AdrLin1><AdrLin2>Baldersbækvej 24-26</AdrLin2><AdrLin3>DK-2635  Ishøj</AdrLin3><AdrLin4>Denmark</AdrLin4>
+</HEAD_ADRESS>
+<Sprog>DK</Sprog></HEAD_INFO>
+<MASTER_INFO>
+<Kontonr>654321</Kontonr><Aftale>9784432899</Aftale><OrgAftale></OrgAftale><Sprog>DK</Sprog><artHtxt>Rocket town</artHtxt><artfornav></artfornav><artundert></artundert><Momskode>abcdefghijklmnop</Momskode><AftNavn>Rocket town</AftNavn><Dato>20.03.26</Dato><Afregnet>01.01.20</Afregnet><Afregnes>30.06.20</Afregnes><UserName>schilling</UserName><RPC_kode></RPC_kode><RBC_kode></RBC_kode><RBC_kurs>   100,000</RBC_kurs><AfrNr>               5</AfrNr><PrimoAfr>               0</PrimoAfr><NoStock>1</NoStock><KombiAft></KombiAft><CREDITOR_USE_SUM_INFO>1</CREDITOR_USE_SUM_INFO><AGREEMENT_USE_SUM_INFO>0</AGREEMENT_USE_SUM_INFO><Deduction>          50,00</Deduction><Method></Method><VoucherNumber></VoucherNumber><VoucherDate></VoucherDate><DueDate></DueDate></MASTER_INFO>
+<MASTER_GUARANTEE>
+<Gar>        3.552,00</Gar><GarRst>        2.220,00</GarRst></MASTER_GUARANTEE>
+<MASTER_GUARANTEE_GLOBAL>
+<GlobGar>        3.996,00</GlobGar><GlobGarRst>        3.996,00</GlobGarRst></MASTER_GUARANTEE_GLOBAL>
+<MASTER_ADVANCE>
+<Fors>       -1.776,00</Fors><ForsRst>            0,00</ForsRst></MASTER_ADVANCE>
+<STOCK_ISSUES>
+<LagOplag>               0</LagOplag><LagOplagA>               0</LagOplagA><FtLagOplag>               0</FtLagOplag><FtLagSum>               0</FtLagSum></STOCK_ISSUES>
+<STOCK_FREE_COPIES>
+<LagFri>               0</LagFri><LagFriAkk>               0</LagFriAkk><FtLagFri>               0</FtLagFri><TekstFri></TekstFri></STOCK_FREE_COPIES>
+<STOCK_WASTE>
+<LagSvind>               0</LagSvind><LagSvindA>               0</LagSvindA><FtLagSvind>           1.650</FtLagSvind></STOCK_WASTE>
+<STOCK_DESTROY>
+<LagMaku>               0</LagMaku><LagMakuA>               0</LagMakuA></STOCK_DESTROY>
+<STOCK_EARLIER_SALE>
+<LagTidlAfr>          -1.650</LagTidlAfr></STOCK_EARLIER_SALE>
+<STOCK1>
+<LagForlag>               0</LagForlag><LagForlagF>               0</LagForlagF></STOCK1>
+<STOCK2>
+<LagForhan>               0</LagForhan><LagForhanF>               0</LagForhanF><LagForhFt>               0</LagForhFt><LagForhFtF>               0</LagForhFtF></STOCK2>
+<SALES_INFO>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>           49,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          10,000</SalVilkar><SalRoypris>            4,08</SalRoypris><SalPrisTyp>    2</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>          949,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          10,000</SalVilkar><SalRoypris>           99,50</SalRoypris><SalPrisTyp>    4</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>V F-pris</PriceTypeName><PriceTypeDesc>V F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_INFO_CHANNEL_PRICE_SUM>
+<SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalBelSum>            0,00</SalBelSum><SalSumRSC>            0,00</SalSumRSC><SalRoySum>            0,00</SalRoySum><SalAntSum>            0,00</SalAntSum><SalTilSum>          998,00</SalTilSum><SalVilkar>          10,000</SalVilkar><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><PriceTypeName>V F-pris</PriceTypeName><PriceTypeDesc>V F-pris</PriceTypeDesc></SALES_INFO_CHANNEL_PRICE_SUM>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>           50,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          11,000</SalVilkar><SalRoypris>            4,08</SalRoypris><SalPrisTyp>    2</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_INFO_CHANNEL_PRICE_SUM>
+<SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalBelSum>            0,00</SalBelSum><SalSumRSC>            0,00</SalSumRSC><SalRoySum>            0,00</SalRoySum><SalAntSum>            0,00</SalAntSum><SalTilSum>           50,00</SalTilSum><SalVilkar>          11,000</SalVilkar><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_INFO_CHANNEL_PRICE_SUM>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>          651,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          12,000</SalVilkar><SalRoypris>           99,50</SalRoypris><SalPrisTyp>    4</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>V F-pris</PriceTypeName><PriceTypeDesc>V F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>         -100,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          12,000</SalVilkar><SalRoypris>           99,50</SalRoypris><SalPrisTyp>    4</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>V F-pris</PriceTypeName><PriceTypeDesc>V F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>           50,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          12,000</SalVilkar><SalRoypris>            4,08</SalRoypris><SalPrisTyp>    2</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_OBJ>
+<SalgTot>            0,00</SalgTot><SalgRoyTot>            0,00</SalgRoyTot><SalAntal>            0,00</SalAntal><SalTidl>            1,00</SalTidl><SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalVilkar>          12,000</SalVilkar><SalRoypris>            4,08</SalRoypris><SalPrisTyp>    2</SalPrisTyp><SalPerStat>           0</SalPerStat><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><SalTotOPR>            0,00</SalTotOPR><royActualAmount>           0,00</royActualAmount><royActualPct>          0,000</royActualPct><royShowActual>0</royShowActual><PeriodRevenue>        0,00</PeriodRevenue><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_OBJ>
+<SALES_INFO_CHANNEL_PRICE_SUM>
+<SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><SalPris>01</SalPris><PriceGrpDeduction>            0,00</PriceGrpDeduction><SalPrNavn>Normal sale</SalPrNavn><SalBelSum>            0,00</SalBelSum><SalSumRSC>            0,00</SalSumRSC><SalRoySum>            0,00</SalRoySum><SalAntSum>            0,00</SalAntSum><SalTilSum>          602,00</SalTilSum><SalVilkar>          12,000</SalVilkar><RSC_kode></RSC_kode><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs><PriceTypeName>F-pris</PriceTypeName><PriceTypeDesc>F-pris</PriceTypeDesc></SALES_INFO_CHANNEL_PRICE_SUM>
+<SALES_INFO_CHANNEL_SUM>
+<SalKanal>01</SalKanal><SalKanNavn>Retail</SalKanNavn><KanalSum>            0,00</KanalSum><RBC_kode></RBC_kode></SALES_INFO_CHANNEL_SUM>
+<SALES_INFO_SUM>
+<SaleSum>            0,00</SaleSum><SaleAntSum>            0,00</SaleAntSum><RBC_kode></RBC_kode></SALES_INFO_SUM>
+</SALES_INFO>
+<PART_IN>
+<SalTotDel>            0,00</SalTotDel><SalVilkDel>          25,000</SalVilkDel><SalPrDel>            0,00</SalPrDel></PART_IN>
+<TRANSFERRED>
+<SalTotOldB>            0,00</SalTotOldB></TRANSFERRED>
+<CALC_GUARANTEE>
+</CALC_GUARANTEE>
+<CALC_GUARANTEE_GLOBAL>
+<GlobAft></GlobAft></CALC_GUARANTEE_GLOBAL>
+<PAYMENT>
+<Udbet>            0,00</Udbet><UdbetDato>30.09.20</UdbetDato><UdbetOPR>            0,00</UdbetOPR><UdbetVal></UdbetVal><UdbetKurs>          100,00</UdbetKurs><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs></PAYMENT>
+<DETENTION_OLD>
+<SalTilbOld>            0,00</SalTilbOld></DETENTION_OLD>
+<FINALLY_SETTLEMENT>
+<slutafr>    0</slutafr></FINALLY_SETTLEMENT>
+<PRODUCT_INFO>
+<PArtnr>9784432899</PArtnr><PArttxt>Rocket town</PArttxt><PUtxt></PUtxt><PForfnavn></PForfnavn><Pisbn>7781234567899</Pisbn><PUdDato>12.07.12</PUdDato><PPrnr>0</PPrnr><PSpris>          204,00</PSpris></PRODUCT_INFO>
+<PRODUCT_INFO>
+<PArtnr>9784432899</PArtnr><PArttxt>Rocket town</PArttxt><PUtxt></PUtxt><PForfnavn></PForfnavn><Pisbn>7781234567899</Pisbn><PUdDato>12.07.12</PUdDato><PPrnr>9</PPrnr><PSpris>            0,00</PSpris></PRODUCT_INFO>
+<NETREVENUE>
+</NETREVENUE>
+<MASTER_GUARANTEE_METHOD>
+<MethodGar>           0,00</MethodGar><MethodGarRst>           0,00</MethodGarRst></MASTER_GUARANTEE_METHOD>
+<ARRANGEMENT_TOTAL>
+<AftTotUdb>            0,00</AftTotUdb><AftTotOvf>       -6.216,00</AftTotOvf><AftTotUdbV>            0,00</AftTotUdbV><AftKombiTx></AftKombiTx></ARRANGEMENT_TOTAL>
+</ARRANGEMENT_INFO>
+<BUTTOM_INFO>
+<BUTTOM_INFO_TOTAL>
+<SalTotUdbV>            0,00</SalTotUdbV></BUTTOM_INFO_TOTAL>
+</BUTTOM_INFO>
+</AUTHOR_ORIGINAL_ARRANGEMENT_INFO>
+<AUTHOR_SUMPAGE_INFO>
+<HEAD_INFO>
+<HEAD_ADRESS>
+<OrgNr>940676-6543</OrgNr><TinNr></TinNr><fgman3/><AdrLin1>C: Johannes B. Hreinsson</AdrLin1><AdrLin2>Baldersbækvej 24-26</AdrLin2><AdrLin3>DK-2635  Ishøj</AdrLin3><AdrLin4>Denmark</AdrLin4>
+</HEAD_ADRESS>
+<Sprog>DK</Sprog></HEAD_INFO>
+<AUTHOR_SUMPAGE_INFO_LINE>
+<Kontonr>654321</Kontonr><Aftale>9784432899</Aftale><OrgAftale></OrgAftale><Sprog>DK</Sprog><artHtxt>Rocket town</artHtxt><artfornav></artfornav><artundert></artundert><Momskode>abcdefghijklmnop</Momskode><AftNavn>Rocket town</AftNavn><Dato>20.03.26</Dato><Afregnet>01.01.20</Afregnet><Afregnes>30.06.20</Afregnes><UserName>schilling</UserName><RPC_kode></RPC_kode><RBC_kode></RBC_kode><RBC_kurs>   100,000</RBC_kurs><AfrNr>               5</AfrNr><PrimoAfr>               0</PrimoAfr><NoStock>1</NoStock><KombiAft></KombiAft><CREDITOR_USE_SUM_INFO>1</CREDITOR_USE_SUM_INFO><AGREEMENT_USE_SUM_INFO>0</AGREEMENT_USE_SUM_INFO><Deduction>          50,00</Deduction><Method></Method><VoucherNumber></VoucherNumber><VoucherDate></VoucherDate><DueDate></DueDate><UdbGloRst>            0,00</UdbGloRst><UdbGloAft></UdbGloAft><Udbet>            0,00</Udbet><UdbetOPR>            0,00</UdbetOPR><UdbetDato>30.09.20</UdbetDato><UdbetVal></UdbetVal><UdbetKurs>          100,00</UdbetKurs><RBC_kode></RBC_kode><RBC_kurs>     0,000</RBC_kurs></AUTHOR_SUMPAGE_INFO_LINE>
+<AUTHOR_SUMPAGE_INFO_TOT>
+<Udbet>            0,00</Udbet><UdbetOPR>            0,00</UdbetOPR><UdbetUM>            0,00</UdbetUM><UdbetKurs>          100,00</UdbetKurs><UdbetVal></UdbetVal><UdbForRstT>            0,00</UdbForRstT><UdbTotAfgT>            0,00</UdbTotAfgT><UdbTotMomT>            0,00</UdbTotMomT><UdbTotSktT>            0,00</UdbTotSktT></AUTHOR_SUMPAGE_INFO_TOT>
+<AUTHOR_SUMPAGE_INFO_BANK>
+<Momskode>abcdefghijklmnop</Momskode><fgman810/><fgman809/><fgman811/><fgman812/></AUTHOR_SUMPAGE_INFO_BANK>
+</AUTHOR_SUMPAGE_INFO>
+<SETTLEMENT_SUMMARY>
+<AGREEMENT_SUMMARY>
+<Aftale>9784432899</Aftale><SALES_SUMMARY>
+<SalKanNavn>Retail</SalKanNavn><SalAntal>            0,00</SalAntal><SalgTot>            0,00</SalgTot></SALES_SUMMARY>
+<SALES_SUMMARY_SUM>
+<SalgTot>            0,00</SalgTot></SALES_SUMMARY_SUM>
+<COSTS_SUMMARY_SUM>
+<SalgTot>            0,00</SalgTot></COSTS_SUMMARY_SUM>
+<TOTAL_SUMMARY>
+<SalgTot>            0,00</SalgTot></TOTAL_SUMMARY>
+</AGREEMENT_SUMMARY>
+</SETTLEMENT_SUMMARY>
+<fgman999/><fgman649/><fgman830/><fgman831/><fgman999/><fgman1005/></RoyAfrEnd3>
+</Body>
+</SchillingReport>

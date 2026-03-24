@@ -1,8 +1,8 @@
-/** Document preview — tabular, raw text, or native PDF view. */
+/** Document preview — tabular, raw text, XML, or native PDF view. */
 
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { FileSpreadsheet, FileText, FileJson, FileType2, Rows3, Search } from 'lucide-react'
+import { FileSpreadsheet, FileText, FileJson, FileType2, FileCode, Rows3, Search } from 'lucide-react'
 import { getUploadContent } from '@/api'
 import type { UploadContentResponse } from '@/types'
 import { Spinner } from '@/components/ui/spinner'
@@ -15,6 +15,7 @@ const FORMAT_META: Record<string, { icon: typeof FileText; label: string; color:
   xlsx: { icon: FileSpreadsheet, label: 'Excel', color: 'text-emerald-400' },
   xls: { icon: FileSpreadsheet, label: 'Excel', color: 'text-emerald-400' },
   json: { icon: FileJson, label: 'JSON', color: 'text-amber-400' },
+  xml: { icon: FileCode, label: 'XML', color: 'text-sky-400' },
   pdf: { icon: FileType2, label: 'PDF', color: 'text-rose-400' },
 }
 

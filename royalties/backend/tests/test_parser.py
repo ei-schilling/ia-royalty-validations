@@ -242,3 +242,89 @@ class TestDanishCSVNormalisation:
         # kanal is not a numeric field — comma should be preserved
         assert rows[0]["kanal"] == "Bog, Audio"
         assert rows[0]["beloeb"] == "100.00"
+
+
+class TestParseXML:
+    """Tests for XML file parsing."""
+
+    def test_element_based_xml(self, fixtures_dir: Path):
+        rows = parse_file(fixtures_dir / "valid_statement.xml", "xml")
+        assert len(rows) == 3
+        assert rows[0]["_source"] == "xml"
+        assert rows[0]["_row_number"] == 1
+        assert rows[0]["transnr"] == "10001"
+        assert rows[0]["transtype"] == "Salg"
+        assert rows[0]["artnr"] == "978-87-1234-567-1"
+        assert rows[0]["beloeb"] == "8997.00"
+
+    def test_xml_retur_row(self, fixtures_dir: Path):
+        rows = parse_file(fixtures_dir / "valid_statement.xml", "xml")
+        retur = rows[1]
+        assert retur["transtype"] == "Retur"
+        assert retur["antal"] == "-50"
+        assert retur["beloeb"] == "-995.00"
+
+    def test_xml_column_normalization(self, fixtures_dir: Path):
+        rows = parse_file(fixtures_dir / "valid_statement.xml", "xml")
+        assert "stkafregnsats" in rows[0]
+        assert "stkpris" in rows[0]
+
+    def test_xml_row_numbers_sequential(self, fixtures_dir: Path):
+        rows = parse_file(fixtures_dir / "valid_statement.xml", "xml")
+        assert rows[0]["_row_number"] == 1
+        assert rows[1]["_row_number"] == 2
+        assert rows[2]["_row_number"] == 3
+
+    def test_attribute_based_xml(self, tmp_path: Path):
+        """Attribute-based XML: <Row TRANSNR="1" BELOEB="100.00" />"""
+        f = tmp_path / "attr.xml"
+        f.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            "<Statement>\n"
+            '  <Row TRANSNR="1" TRANSTYPE="Salg" ARTNR="978-87-0000-000-0" BELOEB="500.00" />\n'
+            '  <Row TRANSNR="2" TRANSTYPE="Retur" ARTNR="978-87-0000-000-0" BELOEB="-100.00" />\n'
+            "</Statement>\n",
+            encoding="utf-8",
+        )
+        rows = parse_file(f, "xml")
+        assert len(rows) == 2
+        assert rows[0]["transnr"] == "1"
+        assert rows[0]["transtype"] == "Salg"
+        assert rows[0]["beloeb"] == "500.00"
+        assert rows[1]["beloeb"] == "-100.00"
+
+    def test_xml_danish_numbers_normalised(self, tmp_path: Path):
+        """Danish comma-decimal values in numeric fields are normalised."""
+        f = tmp_path / "danish.xml"
+        f.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            "<Statement>\n"
+            "  <Row><TRANSNR>1</TRANSNR><TRANSTYPE>Salg</TRANSTYPE>"
+            "<ARTNR>978-87-0000-000-0</ARTNR><BELOEB>4.570,59</BELOEB></Row>\n"
+            "</Statement>\n",
+            encoding="utf-8",
+        )
+        rows = parse_file(f, "xml")
+        assert rows[0]["beloeb"] == "4570.59"
+
+    def test_unsupported_format_still_raises(self, tmp_path: Path):
+        dummy = tmp_path / "test.xyz"
+        dummy.write_text("data")
+        with pytest.raises(ValueError, match="Unsupported file format"):
+            parse_file(dummy, "xyz")
+
+    def test_xml_namespace_stripped(self, tmp_path: Path):
+        """XML namespaces on element tags are stripped before normalization."""
+        f = tmp_path / "ns.xml"
+        f.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<ns:Statement xmlns:ns="http://example.com/royalty">\n'
+            "  <ns:Row><ns:TRANSNR>1</ns:TRANSNR><ns:BELOEB>200.00</ns:BELOEB></ns:Row>\n"
+            "  <ns:Row><ns:TRANSNR>2</ns:TRANSNR><ns:BELOEB>300.00</ns:BELOEB></ns:Row>\n"
+            "</ns:Statement>\n",
+            encoding="utf-8",
+        )
+        rows = parse_file(f, "xml")
+        assert len(rows) == 2
+        assert rows[0]["transnr"] == "1"
+        assert rows[0]["beloeb"] == "200.00"

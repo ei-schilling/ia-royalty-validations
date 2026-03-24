@@ -188,6 +188,29 @@ async def get_upload_content(
         lines = [",".join(headers)] + [",".join(r) for r in rows[:50]]
         raw_text = "\n".join(lines)
 
+    elif ext == "xml":
+        try:
+            import xml.etree.ElementTree as ET
+            # Detect encoding from XML declaration first, fall back to UTF-8
+            for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1", "iso-8859-1"):
+                try:
+                    text = raw_bytes.decode(enc)
+                    break
+                except (UnicodeDecodeError, LookupError):
+                    continue
+            else:
+                text = raw_bytes.decode("latin-1", errors="replace")
+            root = ET.fromstring(text)
+            # Pretty-print using ET.indent (Python 3.9+)
+            try:
+                ET.indent(root, space="  ")
+            except AttributeError:
+                pass  # Python < 3.9 fallback — use raw text
+            pretty = ET.tostring(root, encoding="unicode", xml_declaration=False)
+            raw_text = pretty[:500_000]
+        except Exception:
+            raw_text = raw_bytes.decode("utf-8", errors="replace")[:500_000]
+
     elif ext == "pdf":
         try:
             import pdfplumber
@@ -255,6 +278,7 @@ async def get_upload_file(
         "pdf": "application/pdf",
         "csv": "text/csv",
         "json": "application/json",
+        "xml": "application/xml",
         "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "xls": "application/vnd.ms-excel",
     }

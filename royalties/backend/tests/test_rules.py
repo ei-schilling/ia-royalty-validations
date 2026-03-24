@@ -636,16 +636,19 @@ class TestRecipientSharesRule:
         assert self.rule.rule_id == "recipient_shares"
 
     def test_100_percent_passes(self):
+        # Two co-authors of the same title, each 50% → exactly 100%
         data = [
             {
                 "_record_type": "page_summary",
                 "aftale": "AFT-001",
+                "titel": "My Book",
                 "fordeling_pct": "0.5",
                 "_row_number": 199,
             },
             {
                 "_record_type": "page_summary",
                 "aftale": "AFT-001",
+                "titel": "My Book",
                 "fordeling_pct": "0.5",
                 "_row_number": 299,
             },
@@ -653,17 +656,43 @@ class TestRecipientSharesRule:
         issues = self.rule.validate(data)
         assert len(issues) == 0
 
-    def test_over_100_percent_error(self):
+    def test_same_agreement_different_titles_no_issue(self):
+        # Same agreement number but two different titles (independent) — must not flag
         data = [
             {
                 "_record_type": "page_summary",
                 "aftale": "AFT-001",
+                "titel": "Book A",
+                "fordeling_pct": "0.25",
+                "_row_number": 199,
+            },
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "titel": "Book B",
+                "fordeling_pct": "0.25",
+                "_row_number": 299,
+            },
+        ]
+        issues = self.rule.validate(data)
+        # Each title independently is only 25% — both should warn, neither should error
+        errors = [i for i in issues if i.severity == Severity.ERROR]
+        assert len(errors) == 0
+
+    def test_over_100_percent_error(self):
+        # Two co-authors of the same title, each 60% → 120%, should error
+        data = [
+            {
+                "_record_type": "page_summary",
+                "aftale": "AFT-001",
+                "titel": "My Book",
                 "fordeling_pct": "0.6",
                 "_row_number": 199,
             },
             {
                 "_record_type": "page_summary",
                 "aftale": "AFT-001",
+                "titel": "My Book",
                 "fordeling_pct": "0.6",
                 "_row_number": 299,
             },
@@ -678,6 +707,7 @@ class TestRecipientSharesRule:
             {
                 "_record_type": "page_summary",
                 "aftale": "AFT-001",
+                "titel": "My Book",
                 "fordeling_pct": "0.3",
                 "_row_number": 199,
             },
@@ -685,7 +715,7 @@ class TestRecipientSharesRule:
         issues = self.rule.validate(data)
         warnings = [i for i in issues if i.severity == Severity.WARNING]
         assert len(warnings) == 1
-        assert "unclaimed" in warnings[0].message
+        assert "may not be present in this file" in warnings[0].message
 
     def test_no_pdf_data_no_issues(self):
         data = [{"transtype": "Salg", "_source": "csv", "_row_number": 2}]

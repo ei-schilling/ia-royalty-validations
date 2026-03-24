@@ -22,6 +22,14 @@ _KEY_FIELDS = frozenset({
     "artnr", "aftale", "kontonr", "transtype", "bilagsnr",
 })
 
+# Characters that indicate PDF font/encoding corruption (e.g. æ/ø/å rendered as ¿).
+# ¿ (U+00BF) is the inverted question mark — legitimate only in Spanish, never in
+# Danish royalty statements. U+FFFD is the Unicode replacement character.
+_ENCODING_CORRUPTION_CHARS = {
+    "\u00BF": "inverted question mark (¿) — likely a corrupted Danish character (æ/ø/å)",
+    "\uFFFD": "Unicode replacement character (\uFFFD) — undecodable byte in source",
+}
+
 # Zero-width and invisible Unicode characters that corrupt parsing silently.
 _ZERO_WIDTH_CHARS = {
     "\u200B": "zero-width space",
@@ -103,6 +111,24 @@ class UnwantedSymbolsRule(BaseRule):
                         ),
                         context={"char": _unicode_escape(ch), "fix": "strip control characters"},
                     ))
+
+                # --- WARNING: encoding corruption characters (¿, U+FFFD) ---
+                for ch, label in _ENCODING_CORRUPTION_CHARS.items():
+                    if ch in value:
+                        issues.append(ValidationIssue(
+                            severity=Severity.WARNING,
+                            rule_id=self.rule_id,
+                            rule_description=self.description,
+                            row_number=row_num,
+                            field=field,
+                            expected_value="correctly encoded text",
+                            actual_value=repr(value[:60]),
+                            message=(
+                                f"Field '{field}' contains a {label} — "
+                                f"PDF font or encoding failure; source file may need re-export"
+                            ),
+                            context={"char": _unicode_escape(ch), "fix": "re-export PDF with correct font encoding"},
+                        ))
 
                 # --- ERROR: zero-width / invisible Unicode ---
                 for ch, label in _ZERO_WIDTH_CHARS.items():

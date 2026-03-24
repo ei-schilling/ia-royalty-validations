@@ -71,4 +71,22 @@ class ValidationEngine:
             rows = statement_data if rule.rule_id in _DATA_HYGIENE_RULES else real_rows
             issues = rule.validate(rows)
             all_issues.extend(issues)
+
+        # For XML sources, inject xml_path and xml_tag into each issue's context
+        # so the frontend can display element-path references instead of bare row numbers.
+        xml_row_meta: dict[int, dict] = {
+            row["_row_number"]: {
+                "xml_path": row.get("_xml_path", ""),
+                "xml_tag": row.get("_xml_tag", ""),
+            }
+            for row in statement_data
+            if row.get("_source") == "xml"
+            and row.get("_xml_path")
+            and row.get("_row_number") is not None
+        }
+        if xml_row_meta:
+            for issue in all_issues:
+                if issue.row_number is not None and issue.row_number in xml_row_meta:
+                    issue.context = {**(issue.context or {}), **xml_row_meta[issue.row_number]}
+
         return all_issues

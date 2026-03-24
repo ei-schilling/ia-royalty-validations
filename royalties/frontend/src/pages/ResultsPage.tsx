@@ -96,6 +96,26 @@ const ALL_RULES: { rule_id: string; description: string }[] = [
     rule_id: 'transaction_types',
     description: 'Transaction type must be a recognized Schilling type',
   },
+  {
+    rule_id: 'language_support',
+    description: 'Field values must not contain encoding corruption or unnormalised Danish number formats',
+  },
+  {
+    rule_id: 'missing_labels',
+    description: 'PDF page is missing field/column label texts (lead texts)',
+  },
+  {
+    rule_id: 'stock_balance',
+    description: 'Stock balance: closing stock must equal opening stock adjusted for movements',
+  },
+  {
+    rule_id: 'text_within_margins',
+    description: 'Field values must stay within defined character length limits',
+  },
+  {
+    rule_id: 'unwanted_symbols',
+    description: 'Field values must not contain illegal characters or problematic symbols',
+  },
 ]
 
 /* ─── Severity config ────────────────────────────────── */
@@ -792,7 +812,7 @@ function IssueSection({
   const config = SEVERITY_CONFIG[severity]
   const SevIcon = config.icon
 
-  // Group by rule_id for context
+  // Group by rule_id for context, then sort each group by row_number
   const ruleGroups = new Map<string, { description: string; issues: ValidationIssueSummary[] }>()
   for (const issue of issues) {
     const existing = ruleGroups.get(issue.rule_id)
@@ -801,6 +821,14 @@ function IssueSection({
     } else {
       ruleGroups.set(issue.rule_id, { description: issue.rule_description, issues: [issue] })
     }
+  }
+  // Sort each group's issues by row_number ascending (nulls last)
+  for (const group of ruleGroups.values()) {
+    group.issues.sort((a, b) => {
+      if (a.row_number == null) return 1
+      if (b.row_number == null) return -1
+      return a.row_number - b.row_number
+    })
   }
 
   return (
@@ -1084,7 +1112,15 @@ function IssueCard({
             {issue.row_number != null && (
               <span className="flex items-center gap-1">
                 <Rows3 className="h-3 w-3 text-muted-foreground/50" />
-                Row {issue.row_number}
+                {issue.context?.xml_tag != null
+                  ? <span className="font-mono text-sky-400">&lt;{String(issue.context.xml_tag)}&gt;</span>
+                  : null}
+                {' '}#{issue.row_number}
+              </span>
+            )}
+            {!!issue.context?.xml_path && (
+              <span className="font-mono text-[10px] text-muted-foreground/60 bg-muted/40 px-1.5 py-0.5 rounded">
+                {String(issue.context.xml_path)}
               </span>
             )}
             {issue.field && (

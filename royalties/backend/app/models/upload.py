@@ -24,4 +24,8 @@ class Upload(Base):
     )
 
     user = relationship("User", back_populates="uploads")
-    validation_runs = relationship("ValidationRun", back_populates="upload")
+    validation_runs = relationship(
+        "ValidationRun",
+        back_populates="upload",
+        order_by="ValidationRun.started_at.desc()",
+    )

@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://validator:validator@localhost:5432/validator"
     upload_dir: str = "./uploads"
     max_upload_size_mb: int = 50
-    allowed_extensions: str = "csv,xlsx,json,pdf,zip,tar,gz,rar"
+    allowed_extensions: str = "csv,xlsx,json,xml,pdf,zip,tar,gz,rar"
     cors_origins: List[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
     amount_tolerance: float = 0.01

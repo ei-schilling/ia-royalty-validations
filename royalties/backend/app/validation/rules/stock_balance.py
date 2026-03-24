@@ -12,20 +12,22 @@ class StockBalanceRule(BaseRule):
     The Schilling PDF header block shows:
 
         Total oplag       (cumulative print run)
-        Frieksemplar      (free copies — reduce stock, no royalty)
-        Svind             (shrinkage / waste — reduce stock)
-        Makulatur         (scrapped copies — reduce stock)
-        Periodens salg    (net sales this period — signed; negative = returns)
+        Frieksemplar      (free copies — positive value, already deducted in print run)
+        Svind             (shrinkage / waste)
+        Makulatur         (scrapped copies)
+        Periodens salg    (net sales this period — negative = sold/returned)
         Lagerbeholdning   (closing stock balance)
 
-    Stock balance identity:
+    Every field is printed in the PDF with its correct sign.  The balance
+    identity is therefore a plain sum:
+
         Lagerbeholdning = Total oplag
-                        - Frieksemplar
-                        - Svind
-                        - Makulatur
-                        + Auto reguleret      ← regulatory adjustment (positive = adds stock)
-                        + Tidligere afregnet  ← previously settled copies (negative value)
-                        + Periodens salg      ← net sales this period (negative = sold)
+                        + Frieksemplar        (positive as printed)
+                        + Svind               (positive as printed)
+                        + Makulatur           (positive as printed)
+                        + Auto reguleret      (positive = adds stock)
+                        + Tidligere afregnet  (negative — previously settled copies)
+                        + Periodens salg      (negative — sold this period)
     """
 
     @property
@@ -64,19 +66,19 @@ class StockBalanceRule(BaseRule):
             try:
                 closing_val = float(closing)
                 oplag_val = float(total_oplag)
-                # These fields represent stock reductions; the PDF may store them as
-                # negative (e.g. -11) or positive (e.g. 11) depending on layout.
-                # Always treat as a positive deduction by using abs().
-                frieks_val = abs(float(frieks)) if frieks else 0.0
-                svind_val = abs(float(svind)) if svind else 0.0
-                mak_val = abs(float(makulatur)) if makulatur else 0.0
+                # All fields are taken at face value — the PDF already carries the
+                # correct sign for each item (e.g. Tidligere afregnet is printed as
+                # -55, Periodens salg as -20).  A plain sum must equal Lagerbeholdning.
+                frieks_val = float(frieks) if frieks else 0.0
+                svind_val = float(svind) if svind else 0.0
+                mak_val = float(makulatur) if makulatur else 0.0
                 salg_val = float(periodens_salg)
                 tidligere_val = float(tidligere) if tidligere else 0.0
                 auto_reg_val = float(auto_reg) if auto_reg else 0.0
             except (ValueError, TypeError):
                 continue
 
-            expected = oplag_val - frieks_val - svind_val - mak_val + auto_reg_val + tidligere_val + salg_val
+            expected = oplag_val + frieks_val + svind_val + mak_val + auto_reg_val + tidligere_val + salg_val
 
             if abs(expected - closing_val) > _TOLERANCE:
                 issues.append(
@@ -91,9 +93,9 @@ class StockBalanceRule(BaseRule):
                         message=(
                             f"Page {page_num}: Stock balance mismatch — "
                             f"oplag ({oplag_val:g}) "
-                            f"- frieks ({frieks_val:g}) "
-                            f"- svind ({svind_val:g}) "
-                            f"- makulatur ({mak_val:g}) "
+                            f"+ frieks ({frieks_val:g}) "
+                            f"+ svind ({svind_val:g}) "
+                            f"+ makulatur ({mak_val:g}) "
                             f"+ auto reguleret ({auto_reg_val:g}) "
                             f"+ tidligere afregnet ({tidligere_val:g}) "
                             f"+ periodens salg ({salg_val:g}) "

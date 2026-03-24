@@ -8,6 +8,7 @@ import {
   FileSpreadsheet,
   FileJson,
   FileType2,
+  FileCode,
   RotateCw,
   CheckCircle2,
   AlertCircle,
@@ -37,6 +38,7 @@ const FORMAT_META: Record<string, { icon: typeof FileText; color: string; bg: st
   csv: { icon: FileText, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   xlsx: { icon: FileSpreadsheet, color: 'text-blue-400', bg: 'bg-blue-500/10' },
   json: { icon: FileJson, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  xml: { icon: FileCode, color: 'text-sky-400', bg: 'bg-sky-500/10' },
   pdf: { icon: FileType2, color: 'text-red-400', bg: 'bg-red-500/10' },
 }
 

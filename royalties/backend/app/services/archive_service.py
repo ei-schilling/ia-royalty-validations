@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 ARCHIVE_EXTENSIONS = {"zip", "tar", "gz", "rar"}
-INNER_ALLOWED = {"csv", "xlsx", "json", "pdf"}
+INNER_ALLOWED = {"csv", "xlsx", "json", "xml", "pdf"}
 
 
 def is_archive(ext: str) -> bool:

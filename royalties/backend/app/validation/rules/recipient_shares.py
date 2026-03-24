@@ -24,14 +24,18 @@ class RecipientSharesRule(BaseRule):
     def validate(self, statement_data: list[dict]) -> list[ValidationIssue]:
         issues = []
 
-        # Collect fordeling percentages per agreement (PDF data)
-        shares: dict[str, list[tuple[float, Optional[int]]]] = {}
+        # Group by (aftale, titel) so that co-authors of the same work are checked
+        # together, while independent titles under the same agreement are NOT summed.
+        # A single author with multiple titles in one agreement would otherwise
+        # incorrectly trigger the >100% error.
+        shares: dict[tuple[str, str], list[tuple[float, Optional[int]]]] = {}
 
         for row in statement_data:
             if row.get("_record_type") != "page_summary":
                 continue
 
             aftale = row.get("aftale", "")
+            titel = row.get("titel", "")
             fordeling_pct = row.get("fordeling_pct", "")
             row_num = row.get("_row_number")
 
@@ -43,10 +47,11 @@ class RecipientSharesRule(BaseRule):
             except (ValueError, TypeError):
                 continue
 
-            shares.setdefault(aftale, []).append((pct, row_num))
+            shares.setdefault((aftale, titel), []).append((pct, row_num))
 
-        for aftale, pct_list in shares.items():
+        for (aftale, titel), pct_list in shares.items():
             total = sum(p for p, _ in pct_list)
+            title_suffix = f" / {titel}" if titel else ""
             if total > 1.0 + 0.001:  # Small tolerance for floating point
                 issues.append(
                     ValidationIssue(
@@ -58,10 +63,10 @@ class RecipientSharesRule(BaseRule):
                         expected_value="<= 100%",
                         actual_value=f"{total:.1%}",
                         message=(
-                            f"Recipient shares for agreement {aftale} sum to {total:.1%} "
+                            f"Recipient shares for agreement {aftale}{title_suffix} sum to {total:.1%} "
                             f"(exceeds 100%)"
                         ),
-                        context={"aftale": aftale, "shares": [p for p, _ in pct_list]},
+                        context={"aftale": aftale, "titel": titel, "shares": [p for p, _ in pct_list]},
                     )
                 )
             elif total < 1.0 - 0.001:
@@ -74,11 +79,11 @@ class RecipientSharesRule(BaseRule):
                     expected_value="100%",
                     actual_value=f"{total:.1%}",
                     message=(
-                        f"Recipient shares for agreement {aftale} sum to only {total:.1%}. "
+                        f"Recipient shares for agreement {aftale}{title_suffix} sum to only {total:.1%}. "
                         f"Other recipients or the publisher may receive the remaining share, "
                         f"which may not be present in this file."
                     ),
-                    context={"aftale": aftale, "shares": [p for p, _ in pct_list]},
+                    context={"aftale": aftale, "titel": titel, "shares": [p for p, _ in pct_list]},
                 ))
 
         return issues
